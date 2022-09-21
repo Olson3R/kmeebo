@@ -1,0 +1,13 @@
+{
+  "env": "production",
+  "Database": {
+    "username": "kmeebo",
+    "password": null,
+    "database": "kmeebo",
+    "host": "mysql.ee.spidermo.net",
+    "dialect": "mysql"
+  },
+  "Discord": {
+    "botToken": null
+  }
+}
