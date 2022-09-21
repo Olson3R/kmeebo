@@ -4,18 +4,17 @@ const fs = require('fs')
 const fsp = require('fs/promises')
 const path = require('path')
 const { DateTime } = require('luxon')
-const Fuse = require('fuse.js')
+// const Fuse = require('fuse.js')
 const Finder = require('homoglyph-finder')
 const _ = require('lodash')
 
 const GoogleAuth = require('../../config/google-cloud-credentials.json')
 const Systems = require('../../config/systems.json')
-const Ships = require('../../config/ships.json')
 const { KillReport } = require('../models')
 const logger = require('./logger')
 
 const REGIONS = _.chain(Systems).map('region').uniq().value()
-const SHIP_TYPES = _.chain(Ships).map('type').uniq().value()
+// const SHIP_TYPES = _.chain(Ships).map('type').uniq().value()
 const KM_DIR = './kill-reports'
 const RES = {
   en: {
@@ -29,6 +28,30 @@ const RES = {
     playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
     corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
     time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
+  },
+  es: {
+    killReportId: /INFORME DE MUERTES [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
+    participantCount: /Participantes \[(?<value>[\d]+)\]/i,
+    finalBlow: /Golpe de gracia (?<damage>[\d]+) (?<percent>[\d]+)%/i,
+    topDamage: /Daño máximo (?<damage>[\d]+) (?<percent>[\d]+)%/i,
+    warpScrambleStrength: /Potencia de los codificadores de impulsos: (?<value>-?\d+\.?\d?)/i,
+    totalDamage: /Daño total: (?<value>[\d]+)/i,
+    isk: /(?<value>[\d,]+) ISK/i,
+    playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
+    corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
+    time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
+  },
+  pt: {
+    killReportId: /RELATÓRIO DE (ABATES|DERROTA) [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
+    participantCount: /Participantes \[(?<value>[\d]+)\]/i,
+    finalBlow: /Golpe final (?<damage>[\d]+) (?<percent>[\d]+)%/i,
+    topDamage: /Maior dano (?<damage>[\d]+) (?<percent>[\d]+)%/i,
+    warpScrambleStrength: /Força do codificador de transpulsão: (?<value>-?\d+\.?\d?)/i,
+    totalDamage: /Dano total: (?<value>[\d]+)/i,
+    isk: /(?<value>[\d,]+) ISK/i,
+    playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
+    corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
+    time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
   }
 }
 
@@ -37,6 +60,16 @@ const TEXT = {
     finalBlow: 'Final Blow',
     topDamage: 'Top Damage',
     warpScrambleStrength: ['Warp Scramble Strength', 'Warp Soramble Strength']
+  },
+  es: {
+    finalBlow: 'Golpe de gracia',
+    topDamage: 'Daño máximo',
+    warpScrambleStrength: ['Potencia de los codificadores de impulsos']
+  },
+  pt: {
+    finalBlow: 'Golpe final',
+    topDamage: 'Maior dano',
+    warpScrambleStrength: ['Força do codificador de transpulsão']
   }
 }
 
@@ -117,25 +150,6 @@ const findKillReportIdIdxAndLanguage = (lines) => {
   return [null, null]
 }
 
-// const findPlayerIdxBetweenIdxs = (lines, lang, beginIdx, endIdx) => {
-//   const idx = _.findLastIndex(lines.slice(beginIdx, endIdx), t => RES[lang].playerAndCorp.test(t))
-//   // console.log('PPPPPPLAYERRRR', beginIdx, idx, endIdx, RES[lang].playerAndCorp.test(lines[8]), lines.slice(beginIdx, endIdx))
-//   if (idx >= 0) {
-//     // console.log('PLAY WOOO', idx)
-//     return idx + beginIdx
-//   }
-
-//   return _.findLastIndex(
-//     lines.slice(beginIdx, endIdx)
-//       .map(line => _.map(Ships, 'name').some(shipName => line && line.includes(shipName)) ? null : line),
-//     line => line && line.length > 2
-//   ) + beginIdx
-// }
-
-// const findPlayerIdxBelowIdx = (data, lang, idx) => {
-//   return  _.findIndex(data, t => RES[lang].playerAndCorp.test(t), idx)
-// }
-
 const parsePlayerAndCorp = (text, lang) => {
   try {
     const { groups } = RES[lang].playerAndCorp.exec(text)
@@ -174,14 +188,14 @@ const closestVertIdx = (data, wx, wy, vertIdx, skipIndexes) => {
   return closeIdx
 }
 
-const findFinalBlow = (data, lang) => {
+const findFinalBlow = (data, lang, ships) => {
   let finalBlowIdx = _.findIndex(data, d => Finder.isMatches(d.description, TEXT[lang].finalBlow))
   if (finalBlowIdx < 0) return { corp: null, player: null }
 
   const top = data[finalBlowIdx]
   const { x: wx, y: wy } = top.boundingPoly.vertices[0]
   let closeIdx = closestVertIdx(data, wx, wy, 2, [finalBlowIdx])
-  const match = _.get(Finder.search(data[closeIdx].description, _.map(Ships, 'name')), '0')
+  const match = _.get(Finder.search(data[closeIdx].description, _.map(ships, 'name')), '0')
   if (match) {
     console.log('SHIPS NAME', data[closeIdx].description, match)
     closeIdx = closestVertIdx(data, wx, wy, 2, [finalBlowIdx, closeIdx])
@@ -191,14 +205,14 @@ const findFinalBlow = (data, lang) => {
   return parsePlayerAndCorp(data[closeIdx].description, lang)
 }
 
-const findTopDamage = (data, lang) => {
+const findTopDamage = (data, lang, ships) => {
   let topIdx = _.findIndex(data, d => Finder.isMatches(d.description, TEXT[lang].topDamage))
   if (topIdx < 0) return { corp: null, player: null }
 
   const top = data[topIdx]
   const { x: wx, y: wy } = top.boundingPoly.vertices[0]
   let closeIdx = closestVertIdx(data, wx, wy, 2, [topIdx])
-  const match = _.get(Finder.search(data[closeIdx].description, _.map(Ships, 'name')), '0')
+  const match = _.get(Finder.search(data[closeIdx].description, _.map(ships, 'name')), '0')
   if (match) {
     console.log('SHIPS NAME', data[closeIdx].description, match)
     closeIdx = closestVertIdx(data, wx, wy, 2, [topIdx, closeIdx])
@@ -221,15 +235,16 @@ const findVictim = (data, lang) => {
   return parsePlayerAndCorp(parts.join(' '), lang)
 }
 
-const parseShipAndType = (line) => {
+const parseShipAndType = (line, ships) => {
   line = line.replace(/[^a-zA-Z ]/g, '').trim()
-  const shipTypes = Object.fromEntries(SHIP_TYPES.map(t => [t, t]).concat(SHIP_TYPES.map(t => [t.slice(0, -1), t])).concat(SHIP_TYPES.map(t => [t.slice(0, -2), t])))
-  const shipType = matchString(line, Object.keys(shipTypes))
+  const shipTypes = _.chain(ships).map('type').uniq().value()
+  const shipTypeMap = Object.fromEntries(shipTypes.map(t => [t, t]).concat(shipTypes.map(t => [t.slice(0, -1), t])).concat(shipTypes.map(t => [t.slice(0, -2), t])))
+  const shipType = matchString(line, Object.keys(shipTypeMap))
   console.log('SHIPPPP', shipType)
   if (!shipType) return [line, null]
 
-  const ship = matchString(line, _.map(Ships, 'name'))
-  return [ship, shipTypes[shipType]]
+  const ship = matchString(line, _.map(ships, 'name'))
+  return [ship, shipTypeMap[shipType]]
 }
 
 const getKillReport = async (guildId, hash, submittedBy, opts = {}) => {
@@ -295,7 +310,7 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
     )
     const data = _.get(result, 'textAnnotations')
     const combined = combineBoxes(data)
-    console.log('COMBINEEE', data.length, combined.length, combined)
+    // console.log('COMBINEEE', data.length, combined.length, combined)
     const [killReportIdIdx, lang] = findKillReportIdIdxAndLanguage(lines)
     if (!lang) {
       killReport.status = 'ERROR'
@@ -316,6 +331,9 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
       //   duplicateKillReport.duplicate = true
       //   return duplicateKillReport
       // }
+
+      const ships = require(`../../config/ships.${lang}.json`)
+      shipTypes = _.chain(ships).map('type').uniq().value()
 
       const participantCountIdx = regExIdx(lines, RES[lang].participantCount)
       if (participantCountIdx >= 0) {
@@ -342,9 +360,10 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
         lines[iskIdx] = null
       }
 
-      const shipIdx = stringIncludesIdx(lines, SHIP_TYPES.concat(SHIP_TYPES.map(t => t.slice(0, -1))).concat(SHIP_TYPES.map(t => t.slice(0, -2))))
+      const shipIdx = stringIncludesIdx(lines, shipTypes.concat(shipTypes.map(t => t.slice(0, -1))).concat(shipTypes.map(t => t.slice(0, -2))))
+      console.log('SHIP IDX', shipIdx)
       if (shipIdx >= 0) {
-        const [shipName, shipType] = parseShipAndType(lines[shipIdx])
+        const [shipName, shipType] = parseShipAndType(lines[shipIdx], ships)
         killReport.shipType = shipType
         killReport.shipName = shipName
         lines[shipIdx] = null
@@ -402,11 +421,11 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
       //   lines[finalBlowIdx] = null
       // }
 
-      const { corp: finalBlowCorp, player: finalBlowName } = findFinalBlow(combined, lang)
+      const { corp: finalBlowCorp, player: finalBlowName } = findFinalBlow(combined, lang, ships)
       killReport.finalBlowCorp = finalBlowCorp
       killReport.finalBlowName = finalBlowName
 
-      const { corp: topDamageCorp, player: topDamageName } = findTopDamage(combined, lang)
+      const { corp: topDamageCorp, player: topDamageName } = findTopDamage(combined, lang, ships)
       killReport.topDamageCorp = topDamageCorp
       killReport.topDamageName = topDamageName
 
