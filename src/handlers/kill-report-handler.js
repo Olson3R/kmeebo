@@ -1,15 +1,12 @@
 const axios = require('axios')
 const fs = require('fs')
 const fsp = require('fs/promises')
+const config = require('config')
 const _ = require('lodash')
 
 const colors = require('../color-util')
 const parseKillReport = require('../services/kill-report-parser')
 
-const CHANNEL_IDS = [
-  '787766810044399616', // SS#bot-dev
-  '1020372930384908288' // HTP#new-km-bot-testing
-]
 const IMAGE_CONTENT_TYPE = /^image\//
 
 const getImageAttachment = async (url) => {
@@ -29,7 +26,7 @@ const getDescription = km => {
 }
 
 const killReportHandler = async message => {
-  if (!CHANNEL_IDS.includes(message.channel.id)) return
+  if (!config.Discord.listenChannels.includes(message.channel.id)) return
 
   console.log(`${message.author.tag} in #${message.channel.name} created a message. ${message.attachments.size}`)
   if (message.attachments.size > 0) {
