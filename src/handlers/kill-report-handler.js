@@ -33,6 +33,7 @@ const killReportHandler = async message => {
     const killReports = []
     for (const attachment of message.attachments.values()) {
       if (!IMAGE_CONTENT_TYPE.test(attachment.contentType)) continue
+      console.log('Processing attachment', attachment)
 
       const guildId = message.guildId
       const submittedBy = message.author.tag
@@ -50,6 +51,8 @@ const killReportHandler = async message => {
       }
     }
 
+    if (killReports.length === 0) return
+
     const status = _.chain(killReports)
       .map(km => km.duplicate ? 'DUPLICATE' : km.status)
       .reduce(
@@ -61,7 +64,6 @@ const killReportHandler = async message => {
         'SUCCESS'
       )
       .value()
-    console.log('STATUSES', status)
     if (status === 'DUPLICATE') {
       await message.react('©️')
     }
@@ -76,8 +78,6 @@ const killReportHandler = async message => {
       color: getColor(km),
       description: getDescription(km)
     }))
-    // const embeds = [{ description: 'this is a test' }]
-    console.log('EEEE', embeds)
     await message.reply({ embeds })
   }
 }

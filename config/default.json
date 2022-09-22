@@ -8,6 +8,7 @@
     "dialect": "mysql"
   },
   "Discord": {
+    "clientId": "1015125394040573983",
     "botToken": null,
     "listenChannels": [
       "1020372930384908288"

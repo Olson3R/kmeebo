@@ -65,6 +65,18 @@ const RES = {
     playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
     corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
     time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
+  },
+  ru: {
+    killReportId: /ОТЧЁТ О БОЕ [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
+    participantCount: /Участники \[(?<value>[\d]+)\]/i,
+    finalBlow: /Решающий удар (?<damage>[\d]+) (?<percent>[\d]+)%/i,
+    topDamage: /Наибольший урон (?<damage>[\d]+) (?<percent>[\d]+)%/i,
+    warpScrambleStrength: /варп-двигателей: (?<value>-?\d+\.?\d?)/i,
+    totalDamage: /Общий урон: (?<value>[\d]+)/i,
+    isk: /(?<value>[\d,]+) ISK/i,
+    playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
+    corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
+    time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
   }
 }
 
@@ -88,6 +100,11 @@ const TEXT = {
     finalBlow: 'Golpe final',
     topDamage: 'Maior dano',
     warpScrambleStrength: ['Força do codificador de transpulsão']
+  },
+  ru: {
+    finalBlow: 'Решающий удар',
+    topDamage: 'Наибольший урон',
+    warpScrambleStrength: ['Мощность глушения']
   }
 }
 
@@ -327,17 +344,21 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
       t => _.trim(t)
     )
     const data = _.get(result, 'textAnnotations')
-    const combined = combineBoxes(data)
-    // console.log('COMBINEEE', data.length, combined.length, combined)
-    const [killReportIdIdx, lang] = findKillReportIdIdxAndLanguage(lines)
+    const lang = _.get(data, '0.locale')
     if (!lang) {
       killReport.status = 'ERROR'
       killReport.statusMessage = 'Cannot determine language'
     }
-    else if (killReportIdIdx >= 0) {
+    else {
+      const combined = combineBoxes(data)
+      // console.log('COMBINEEE', data.length, combined.length, combined)
       killReport.lang = lang
-      killReport.killReportId = parseInt(_.get(runRegExOnString(lines[killReportIdIdx], RES[lang].killReportId), 'value'))
-      lines[killReportIdIdx] = null
+
+      const killReportIdIdx = regExIdx(lines, RES[lang].killReportId)
+      if (killReportIdIdx >= 0) {
+        killReport.killReportId = parseInt(_.get(runRegExOnString(lines[killReportIdIdx], RES[lang].killReportId), 'value'))
+        lines[killReportIdIdx] = null
+      }
 
       // const duplicateKillReport = await KillReport.findOne({ guildId, killReportId: killReport.killReportId, status: 'SUCCESS' })
       // if (duplicateKillReport) {
@@ -457,10 +478,6 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
       }
 
       killReport.status = 'SUCCESS'
-    }
-    else {
-      killReport.status = 'FAILED'
-      killReport.statusMessage = 'Failed to determine kill report id and/or language'
     }
   }
   catch(e) {
