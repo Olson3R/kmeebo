@@ -17,6 +17,19 @@ const REGIONS = _.chain(Systems).map('region').uniq().value()
 // const SHIP_TYPES = _.chain(Ships).map('type').uniq().value()
 const KM_DIR = './kill-reports'
 const RES = {
+
+  de: {
+    killReportId: /(ABSCHUSSBERICHT|VERLUSTBERICHT|) [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
+    participantCount: /Teilnehmer \[(?<value>[\d]+)\]/i,
+    finalBlow: /Finaler Schlag (?<damage>[\d]+) (?<percent>[\d]+)%/i,
+    topDamage: /Höchster Schaden (?<damage>[\d]+) (?<percent>[\d]+)%/i,
+    warpScrambleStrength: /Warp-Störungsstärke: (?<value>-?\d+\.?\d?)/i,
+    totalDamage: /Gesamtschaden: (?<value>[\d]+)/i,
+    isk: /(?<value>[\d,]+) ISK/i,
+    playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
+    corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
+    time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
+  },
   en: {
     killReportId: /(KILL|LOSS) REPORT [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
     participantCount: /Participants \[(?<value>[\d]+)\]/i,
@@ -56,6 +69,11 @@ const RES = {
 }
 
 const TEXT = {
+  de: {
+    finalBlow: 'Finaler Schlag',
+    topDamage: 'Höchster Schaden',
+    warpScrambleStrength: ['Warp-Störungsstärke']
+  },
   en: {
     finalBlow: 'Final Blow',
     topDamage: 'Top Damage',
