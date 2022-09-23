@@ -8,7 +8,7 @@ const formatNumber = (text) => {
   if (_.isNil(text)) return '0'
   if (_.isNaN(text)) return '0'
 
-  return text.toLocaleString()
+  return Math.round(text).toLocaleString()
 }
 
 const corporationStats = async (interaction) => {
@@ -28,11 +28,11 @@ const corporationStats = async (interaction) => {
     title: 'Lifetime Stats',
     description: `**Kills** ${formatNumber(killReports.length)}\n` +
       `**Isk Killed** ${formatNumber(iskKilled)}\n` +
-      `**Avg Isk/Kill** ${Math.round(formatNumber(iskKilled / killReports.length))}\n` +
+      `**Avg Isk/Kill** ${formatNumber(iskKilled / killReports.length)}\n` +
       `**Largest Kill** ${formatNumber(_.maxBy(killReports, 'isk')?.isk)}\n\n` +
       `**Losses** ${formatNumber(lossReports.length)}\n` +
       `**Isk Lost** ${formatNumber(_.sumBy(lossReports, 'isk'))}\n` +
-      `**Avg Isk/Loss** ${Math.round(formatNumber(iskLost / lossReports.length))}\n` +
+      `**Avg Isk/Loss** ${formatNumber(iskLost / lossReports.length)}\n` +
       `**Largest Loss** ${formatNumber(_.maxBy(lossReports, 'isk')?.isk)}`
   }
 
@@ -47,10 +47,10 @@ const corporationStats = async (interaction) => {
     title: '7 Day Stats',
     description: `**Kills** ${formatNumber(weeklyKillReports.length)}\n` +
       `**Isk Killed** ${formatNumber(weeklyIskKilled)}\n` +
-      `**Avg Isk/Kill** ${Math.round(formatNumber(weeklyIskKilled / weeklyKillReports.length))}\n\n` +
+      `**Avg Isk/Kill** ${formatNumber(weeklyIskKilled / weeklyKillReports.length)}\n\n` +
       `**Losses** ${formatNumber(weeklyLossReports.length)}\n` +
       `**Isk Lost** ${formatNumber(_.sumBy(weeklyLossReports, 'isk'))}\n` +
-      `**Avg Isk/Loss** ${Math.round(formatNumber(weeklyIskLost / weeklyLossReports.length))}`
+      `**Avg Isk/Loss** ${formatNumber(weeklyIskLost / weeklyLossReports.length)}`
   }
 
 
@@ -66,10 +66,10 @@ const corporationStats = async (interaction) => {
     title: '24 Hour Stats',
     description: `**Kills** ${formatNumber(dailyKillReports.length)}\n` +
       `**Isk Killed** ${formatNumber(dailyIskKilled)}\n` +
-      `**Avg Isk/Kill** ${Math.round(formatNumber(dailyIskKilled / dailyKillReports.length))}\n\n` +
+      `**Avg Isk/Kill** ${formatNumber(dailyIskKilled / dailyKillReports.length)}\n\n` +
       `**Losses** ${formatNumber(dailyLossReports.length)}\n` +
       `**Isk Lost** ${formatNumber(_.sumBy(dailyLossReports, 'isk'))}\n` +
-      `**Avg Isk/Loss** ${Math.round(formatNumber(dailyIskLost / dailyLossReports.length))}`
+      `**Avg Isk/Loss** ${formatNumber(dailyIskLost / dailyLossReports.length)}`
   }
   await interaction.reply({ content: `Corporation stats for ${corporationTag}`, embeds: [lifetime, weekly, daily] })
 }
