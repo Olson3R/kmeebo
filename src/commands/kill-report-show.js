@@ -17,8 +17,6 @@ const formatNumber = (text) => {
 }
 
 const killReportShow = async (interaction) => {
-  // interaction.deferReply()
-
   const guildId = interaction.guildId
   const id = interaction.options.getString('id')
 

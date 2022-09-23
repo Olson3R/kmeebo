@@ -355,129 +355,124 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
       killReport.lang = lang
 
       const killReportIdIdx = regExIdx(lines, RES[lang].killReportId)
-      if (killReportIdIdx >= 0) {
+      if (killReportIdIdx < 0) {
+        killReport.status = 'ERROR'
+        killReport.statusMessage = 'Cannot find kill report id'
+      }
+      else {
         killReport.killReportId = parseInt(_.get(runRegExOnString(lines[killReportIdIdx], RES[lang].killReportId), 'value'))
         lines[killReportIdIdx] = null
-      }
 
-      // const duplicateKillReport = await KillReport.findOne({ guildId, killReportId: killReport.killReportId, status: 'SUCCESS' })
-      // if (duplicateKillReport) {
-      //   logger.info("DUPLICATEEEE", { dkid: duplicateKillReport.killReportId, kid: killReport.killReportId })
-      //   killReport.status = 'DUPLICATE'
-      //   killReport.statusMessage = `Duplicate of ${duplicateKillReport.id}`
-      //   await killReport.save()
+        const duplicateKillReport = await KillReport.findOne({ guildId, killReportId: killReport.killReportId, status: 'SUCCESS' })
+        if (duplicateKillReport) {
+          logger.info("DUPLICATEEEE", { dkid: duplicateKillReport.killReportId, kid: killReport.killReportId })
+          killReport.status = 'DUPLICATE'
+          killReport.statusMessage = `Duplicate of ${duplicateKillReport.id}`
+          await killReport.save()
 
-      //   duplicateKillReport.duplicate = true
-      //   return duplicateKillReport
-      // }
+          duplicateKillReport.duplicate = true
+          return duplicateKillReport
+        }
 
-      const ships = require(`../../config/ships.${lang}.json`)
-      shipTypes = _.chain(ships).map('type').uniq().value()
+        const ships = require(`../../config/ships.${lang}.json`)
+        shipTypes = _.chain(ships).map('type').uniq().value()
 
-      const participantCountIdx = regExIdx(lines, RES[lang].participantCount)
-      if (participantCountIdx >= 0) {
-        killReport.participantCount = parseInt(_.get(runRegExOnString(lines[participantCountIdx], RES[lang].participantCount), 'value'))
-        lines[participantCountIdx] = null
-      }
+        const participantCountIdx = regExIdx(lines, RES[lang].participantCount)
+        if (participantCountIdx >= 0) {
+          killReport.participantCount = parseInt(_.get(runRegExOnString(lines[participantCountIdx], RES[lang].participantCount), 'value'))
+          lines[participantCountIdx] = null
+        }
 
-      const warpScrambleStrengthIdx = regExIdx(lines, RES[lang].warpScrambleStrength)
-      if (warpScrambleStrengthIdx >= 0) {
-        killReport.warpScrambleStrength = parseFloat(_.get(runRegExOnString(lines[warpScrambleStrengthIdx], RES[lang].warpScrambleStrength), 'value'))
-        lines[warpScrambleStrengthIdx] = null
-      }
+        const warpScrambleStrengthIdx = regExIdx(lines, RES[lang].warpScrambleStrength)
+        if (warpScrambleStrengthIdx >= 0) {
+          killReport.warpScrambleStrength = parseFloat(_.get(runRegExOnString(lines[warpScrambleStrengthIdx], RES[lang].warpScrambleStrength), 'value'))
+          lines[warpScrambleStrengthIdx] = null
+        }
 
-      const totalDamageIdx = regExIdx(lines, RES[lang].totalDamage)
-      if (totalDamageIdx >= 0) {
-        killReport.totalDamage = parseInt(_.get(runRegExOnString(lines[totalDamageIdx], RES[lang].totalDamage), 'value'))
-        lines[totalDamageIdx] = null
-      }
+        const totalDamageIdx = regExIdx(lines, RES[lang].totalDamage)
+        if (totalDamageIdx >= 0) {
+          killReport.totalDamage = parseInt(_.get(runRegExOnString(lines[totalDamageIdx], RES[lang].totalDamage), 'value'))
+          lines[totalDamageIdx] = null
+        }
 
-      const iskIdx = regExIdx(lines, RES[lang].isk)
-      if (iskIdx >= 0) {
-        const v = runRegExOnString(lines[iskIdx], RES[lang].isk)
-        killReport.isk = parseInt(_.get(v, 'value').replace(/,/g, ''))
-        lines[iskIdx] = null
-      }
+        const iskIdx = regExIdx(lines, RES[lang].isk)
+        if (iskIdx >= 0) {
+          const v = runRegExOnString(lines[iskIdx], RES[lang].isk)
+          killReport.isk = parseInt(_.get(v, 'value').replace(/,/g, ''))
+          lines[iskIdx] = null
+        }
 
-      const shipIdx = stringIncludesIdx(lines, shipTypes.concat(shipTypes.map(t => t.slice(0, -1))).concat(shipTypes.map(t => t.slice(0, -2))))
-      console.log('SHIP IDX', shipIdx)
-      if (shipIdx >= 0) {
-        const [shipName, shipType] = parseShipAndType(lines[shipIdx], ships)
-        killReport.shipType = shipType
-        killReport.shipName = shipName
-        lines[shipIdx] = null
-      }
+        const shipIdx = stringIncludesIdx(lines, shipTypes.concat(shipTypes.map(t => t.slice(0, -1))).concat(shipTypes.map(t => t.slice(0, -2))))
+        console.log('SHIP IDX', shipIdx)
+        if (shipIdx >= 0) {
+          const [shipName, shipType] = parseShipAndType(lines[shipIdx], ships)
+          killReport.shipType = shipType
+          killReport.shipName = shipName
+          lines[shipIdx] = null
+        }
 
-      const timeIdx = regExIdx(lines, RES[lang].time)
-      if (timeIdx >= 0) {
-        const tRaw = _.get(runRegExOnString(lines[timeIdx], RES[lang].time), 'value').replace(/UTC\s*/, '')
-        killReport.killedAt = DateTime.fromFormat(tRaw, 'yyyy/MM/dd HH:mm:ss Z', { zone: 'UTC' })
-        lines[timeIdx] = null
-      }
+        const timeIdx = regExIdx(lines, RES[lang].time)
+        if (timeIdx >= 0) {
+          const tRaw = _.get(runRegExOnString(lines[timeIdx], RES[lang].time), 'value').replace(/UTC\s*/, '')
+          killReport.killedAt = DateTime.fromFormat(tRaw, 'yyyy/MM/dd HH:mm:ss Z', { zone: 'UTC' })
+          lines[timeIdx] = null
+        }
 
-      const locationLines = _.filter(lines, line => line && line.match(/\</))
-      const locationLineIdx = stringIncludesIdx(_.map(locationLines, l => _.trim(_.last(_.split(l, '<')))), REGIONS)
-      if (locationLineIdx >= 0) {
-        const locationIdx = _.findIndex(lines, l => l === locationLines[locationLineIdx])
-        if (locationIdx >= 0) {
-          let location = lines[locationIdx]
-          lines[locationIdx] = null
-          killReport.location = location
-          killReport.region = matchString(_.trim(_.last(_.split(location, '<'))), REGIONS)
-          if (killReport.region) {
-            location = location.trim().slice(0, -killReport.region.length).replace(/\s*\<\s*\w{0,2}\s*$/, '')
-            const constellations = _.chain(Systems)
-              .filter({ region: killReport.region })
-              .map('constellation')
-              .uniq()
-              .value()
-            killReport.constellation = matchString(_.trim(_.last(_.split(location, '<'))), constellations)
-            if (killReport.constellation) {
-              location = location.replace(killReport.constellation, '').replace(/\s*\<\s*\w{0,2}\s*$/, '')
-              const systemNames = _.chain(Systems)
-                .filter({ region: killReport.region, constellation: killReport.constellation })
-                .map('name')
+        const locationLines = _.filter(lines, line => line && line.match(/\</))
+        const locationLineIdx = stringIncludesIdx(_.map(locationLines, l => _.trim(_.last(_.split(l, '<')))), REGIONS)
+        if (locationLineIdx >= 0) {
+          const locationIdx = _.findIndex(lines, l => l === locationLines[locationLineIdx])
+          if (locationIdx >= 0) {
+            let location = lines[locationIdx]
+            lines[locationIdx] = null
+            killReport.location = location
+            killReport.region = matchString(_.trim(_.last(_.split(location, '<'))), REGIONS)
+            if (killReport.region) {
+              location = location.trim().slice(0, -killReport.region.length).replace(/\s*\<\s*\w{0,2}\s*$/, '')
+              const constellations = _.chain(Systems)
+                .filter({ region: killReport.region })
+                .map('constellation')
+                .uniq()
                 .value()
-              killReport.system = matchString(location, systemNames)
-              if (!killReport.system) {
-                const systemIdx = stringIncludesIdx(lines, systemNames)
-                if (systemIdx >= 0) {
-                  killReport.system = matchString(lines[systemIdx], systemNames)
-                  lines[systemIdx] = null
+              killReport.constellation = matchString(_.trim(_.last(_.split(location, '<'))), constellations)
+              if (killReport.constellation) {
+                location = location.replace(killReport.constellation, '').replace(/\s*\<\s*\w{0,2}\s*$/, '')
+                const systemNames = _.chain(Systems)
+                  .filter({ region: killReport.region, constellation: killReport.constellation })
+                  .map('name')
+                  .value()
+                killReport.system = matchString(location, systemNames)
+                if (!killReport.system) {
+                  const systemIdx = stringIncludesIdx(lines, systemNames)
+                  if (systemIdx >= 0) {
+                    killReport.system = matchString(lines[systemIdx], systemNames)
+                    lines[systemIdx] = null
+                  }
                 }
               }
             }
           }
         }
+
+        const { corp: finalBlowCorp, player: finalBlowName } = findFinalBlow(combined, lang, ships)
+        killReport.finalBlowCorp = finalBlowCorp
+        killReport.finalBlowName = finalBlowName
+
+        const { corp: topDamageCorp, player: topDamageName } = findTopDamage(combined, lang, ships)
+        killReport.topDamageCorp = topDamageCorp
+        killReport.topDamageName = topDamageName
+
+        const { corp: victimCorp, player: victimName } = findVictim(combined, lang)
+        if (killReport.shipType === 'Corporation Citadel') {
+          killReport.victimCorp = victimName
+        }
+        else {
+          killReport.victimCorp = victimCorp
+          killReport.victimName = victimName
+        }
+
+        killReport.status = 'SUCCESS'
       }
-
-      // const finalBlowIdx = regExIdx(lines, RES[lang].finalBlow)
-      // if (finalBlowIdx >= 0) {
-      //   const finalBlowPlayerIdx = findPlayerIdxBetweenIdxs(lines, lang, participantCountIdx, finalBlowIdx)
-      //   const { corp: finalBlowCorp, player: finalBlowName } = parsePlayerAndCorp(lines[finalBlowPlayerIdx], lang)
-      //   killReport.finalBlowCorp = finalBlowCorp
-      //   killReport.finalBlowName = finalBlowName
-      //   lines[finalBlowIdx] = null
-      // }
-
-      const { corp: finalBlowCorp, player: finalBlowName } = findFinalBlow(combined, lang, ships)
-      killReport.finalBlowCorp = finalBlowCorp
-      killReport.finalBlowName = finalBlowName
-
-      const { corp: topDamageCorp, player: topDamageName } = findTopDamage(combined, lang, ships)
-      killReport.topDamageCorp = topDamageCorp
-      killReport.topDamageName = topDamageName
-
-      const { corp: victimCorp, player: victimName } = findVictim(combined, lang)
-      if (killReport.shipType === 'Corporation Citadel') {
-        killReport.victimCorp = victimName
-      }
-      else {
-        killReport.victimCorp = victimCorp
-        killReport.victimName = victimName
-      }
-
-      killReport.status = 'SUCCESS'
     }
   }
   catch(e) {

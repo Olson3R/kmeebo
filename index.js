@@ -1,9 +1,12 @@
 const { Client, GatewayIntentBits } = require('discord.js')
 const config = require('config')
 
-const { killReportHandler } = require('./src/handlers/kill-report-handler')
+const corporationStats = require('./src/commands/corporation-stats')
 const killReportExport = require('./src/commands/kill-report-export')
 const killReportShow = require('./src/commands/kill-report-show')
+const pilotStats = require('./src/commands/pilot-stats')
+
+const { killReportHandler } = require('./src/handlers/kill-report-handler')
 
 // Create a new client instance
 const client = new Client({
@@ -26,7 +29,14 @@ client.on('interactionCreate', async interaction => {
 
   const { commandName, options } = interaction
 
-  if (commandName === 'kill-report') {
+  if (commandName === 'corporation') {
+    const subcommandName = options.getSubcommand()
+
+    if (subcommandName === 'stats') {
+      await corporationStats(interaction)
+    }
+  }
+  else if (commandName === 'kill-report') {
     const subcommandName = options.getSubcommand()
 
     if (subcommandName === 'export') {
@@ -34,6 +44,13 @@ client.on('interactionCreate', async interaction => {
     }
     else if (subcommandName === 'show') {
       await killReportShow(interaction)
+    }
+  }
+  else if (commandName === 'pilot') {
+    const subcommandName = options.getSubcommand()
+
+    if (subcommandName === 'stats') {
+      await pilotStats(interaction)
     }
   }
 })

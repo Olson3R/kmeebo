@@ -1,6 +1,4 @@
 const axios = require('axios')
-const fs = require('fs')
-const fsp = require('fs/promises')
 const config = require('config')
 const _ = require('lodash')
 
@@ -22,7 +20,7 @@ const getColor = km => {
 
 const getDescription = km => {
   if (km.status === 'ERROR') return `${km.id}\n${km.statusMessage ?? 'Unkown error'}`
-  return `${km.id}\n${km.killReportId} | ${km.isk.toLocaleString()} ISK | [${km.finalBlowCorp ?? '???'}] ${km.finalBlowName}`
+  return `${km.id}\n${km.killReportId} | ${km.isk?.toLocaleString()} ISK | [${km.finalBlowCorp ?? '???'}] ${km.finalBlowName}`
 }
 
 const killReportHandler = async message => {
@@ -42,7 +40,6 @@ const killReportHandler = async message => {
 
       try {
         const killReport = await parseKillReport(guildId, submittedBy, attachment.name, imageData, { url: attachment.url })
-        // console.log('RESULTS', killReport)
         killReports.push(killReport)
       }
       catch(e) {

@@ -4,18 +4,6 @@ const _ = require('lodash')
 const colors = require('../color-util')
 const { KillReport } = require('../models')
 
-const formatDate = (text) => {
-  if (!text) return '???'
-
-  return text.toLocaleString(DateTime.DATETIME_SHORT)
-}
-
-const formatNumber = (text) => {
-  if (_.isNil(text)) return '???'
-
-  return text.toLocaleString()
-}
-
 const killReportExport = async (interaction) => {
   // interaction.deferReply()
 
