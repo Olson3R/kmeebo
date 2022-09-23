@@ -1,6 +1,8 @@
 const { Client, GatewayIntentBits } = require('discord.js')
 const config = require('config')
 
+const adminRemoveChannel = require('./src/commands/admin-remove-channel')
+const adminSetupChannel = require('./src/commands/admin-setup-channel')
 const corporationStats = require('./src/commands/corporation-stats')
 const killReportExport = require('./src/commands/kill-report-export')
 const killReportShow = require('./src/commands/kill-report-show')
@@ -29,7 +31,17 @@ client.on('interactionCreate', async interaction => {
 
   const { commandName, options } = interaction
 
-  if (commandName === 'corporation') {
+  if (commandName === 'admin') {
+    const subcommandName = options.getSubcommand()
+
+    if (subcommandName === 'remove-channel') {
+      await adminRemoveChannel(interaction)
+    }
+    else if (subcommandName === 'setup-channel') {
+      await adminSetupChannel(interaction)
+    }
+  }
+  else if (commandName === 'corporation') {
     const subcommandName = options.getSubcommand()
 
     if (subcommandName === 'stats') {

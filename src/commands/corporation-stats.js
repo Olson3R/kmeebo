@@ -4,12 +4,6 @@ const _ = require('lodash')
 const colors = require('../color-util')
 const { KillReport } = require('../models')
 
-// const formatDate = (text) => {
-//   if (!text) return '???'
-
-//   return text.toLocaleString(DateTime.DATETIME_SHORT)
-// }
-
 const formatNumber = (text) => {
   if (_.isNil(text)) return '0'
   if (_.isNaN(text)) return '0'
