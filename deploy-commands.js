@@ -4,13 +4,13 @@ const config = require('config')
 // const { clientId, token } = require('./config.json');
 
 const commands = [
-  new SlashCommandBuilder().setName('admin').setDescription('Administration commands.')
-    .addSubcommand(subcommand => subcommand.setName('setup-channel').setDescription('Setup up a channel for tracking kill reports.')
-      .addStringOption(option => option.setName('kill-tag').setDescription('An optional tag to associate all kills with.'))
-    )
-    .addSubcommand(subcommand => subcommand.setName('remove-channel').setDescription('Remove a channel from tracking kill reports.')
-      .addChannelOption(option => option.setName('channel').setDescription('The channel to stop processing kill reports for.'))
-    ),
+  // new SlashCommandBuilder().setName('admin').setDescription('Administration commands.')
+  //   .addSubcommand(subcommand => subcommand.setName('setup-channel').setDescription('Setup up a channel for tracking kill reports.')
+  //     .addStringOption(option => option.setName('kill-tag').setDescription('An optional tag to associate all kills with.'))
+  //   )
+  //   .addSubcommand(subcommand => subcommand.setName('remove-channel').setDescription('Remove a channel from tracking kill reports.')
+  //     .addChannelOption(option => option.setName('channel').setDescription('The channel to stop processing kill reports for.'))
+  //   ),
 
   new SlashCommandBuilder().setName('corporation').setDescription('Commands related to corporations.')
     .addSubcommand(subcommand => subcommand.setName('stats').setDescription('Show kills and losses for a corporation.')

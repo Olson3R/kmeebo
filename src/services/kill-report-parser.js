@@ -364,7 +364,7 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
         killReport.killReportId = parseInt(_.get(runRegExOnString(lines[killReportIdIdx], RES[lang].killReportId), 'value'))
         lines[killReportIdIdx] = null
 
-        const duplicateKillReport = await KillReport.findOne({ guildId, killReportId: killReport.killReportId, status: 'SUCCESS' })
+        const duplicateKillReport = await KillReport.findOne({ where: { guildId, killReportId: killReport.killReportId, status: 'SUCCESS' }})
         if (duplicateKillReport) {
           logger.info("DUPLICATEEEE", { dkid: duplicateKillReport.killReportId, kid: killReport.killReportId })
           killReport.status = 'DUPLICATE'
