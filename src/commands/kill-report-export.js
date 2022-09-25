@@ -17,8 +17,10 @@ const killReportExport = async (interaction) => {
   if (killReports.length > 0) {
     const headers = [
       'id',
-      'killReportId',
       'lang',
+      'killReportId',
+      'type',
+      'killTag',
       'shipType',
       'shipName',
       'isk',
