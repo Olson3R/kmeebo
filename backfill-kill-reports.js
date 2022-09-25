@@ -44,7 +44,7 @@ client.once('ready', async () => {
       if (images.length === 0) continue
 
       const myReactions = message.reactions.cache.filter(reaction => reaction.me)
-      if (myReactions.size >= 0) continue
+      if (myReactions.size > 0) continue
 
       console.log(`Processing message ${message.id}`)
       const killReports = []
