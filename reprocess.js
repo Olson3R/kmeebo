@@ -25,7 +25,7 @@ const run = async () => {
     logger.info('Done reprocessing')
   }
   catch(e) {
-    logger.error('Failed to reprocess kill reports', { error: e.message, stackTrace: e.stack })
+    logger.error('Failed to reprocess kill reports', { errors: e.errors, error: e.message, stackTrace: e.stack })
   }
 }
 run()

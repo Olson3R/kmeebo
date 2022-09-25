@@ -14,12 +14,12 @@ const { KillReport } = require('../models')
 const logger = require('./logger')
 
 const REGIONS = _.chain(Systems).map('region').uniq().value()
-// const SHIP_TYPES = _.chain(Ships).map('type').uniq().value()
 const KM_DIR = './kill-reports'
 const RES = {
 
   de: {
-    killReportId: /(ABSCHUSSBERICHT|VERLUSTBERICHT|) [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
+    killReportId: /ABSCHUSSBERICHT [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
+    lossReportId: /VERLUSTBERICHT [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
     participantCount: /Teilnehmer \[(?<value>[\d]+)\]/i,
     finalBlow: /Finaler Schlag (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Höchster Schaden (?<damage>[\d]+) (?<percent>[\d]+)%/i,
@@ -31,7 +31,8 @@ const RES = {
     time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
   },
   en: {
-    killReportId: /(KILL|LOSS) REPORT [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
+    killReportId: /KILL REPORT [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
+    lossReportId: /LOSS REPORT [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
     participantCount: /Participants \[(?<value>[\d]+)\]/i,
     finalBlow: /Final Blow (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Top Damage (?<damage>[\d]+) (?<percent>[\d]+)%/i,
@@ -44,6 +45,7 @@ const RES = {
   },
   es: {
     killReportId: /INFORME DE MUERTES [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
+    lossReportId: /INFORME DE PÉRDIDA [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i, // Guess
     participantCount: /Participantes \[(?<value>[\d]+)\]/i,
     finalBlow: /Golpe de gracia (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Daño máximo (?<damage>[\d]+) (?<percent>[\d]+)%/i,
@@ -55,7 +57,8 @@ const RES = {
     time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
   },
   pt: {
-    killReportId: /RELATÓRIO DE (ABATES|DERROTA) [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
+    killReportId: /RELATÓRIO DE ABATES [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
+    lossReportId: /RELATÓRIO DE DERROTA [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
     participantCount: /Participantes \[(?<value>[\d]+)\]/i,
     finalBlow: /Golpe final (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Maior dano (?<damage>[\d]+) (?<percent>[\d]+)%/i,
@@ -68,11 +71,25 @@ const RES = {
   },
   ru: {
     killReportId: /ОТЧЁТ О БОЕ [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
+    lossReportId: /ОТЧЁТ ОБ УБЫТКАХ [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i, // Guess
     participantCount: /Участники \[(?<value>[\d]+)\]/i,
     finalBlow: /Решающий удар (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Наибольший урон (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /варп-двигателей: (?<value>-?\d+\.?\d?)/i,
     totalDamage: /Общий урон: (?<value>[\d]+)/i,
+    isk: /(?<value>[\d,]+) ISK/i,
+    playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
+    corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
+    time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
+  },
+  zh: {
+    killReportId: /击毁报告 [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
+    lossReportId: /损失报告 [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i, // Guess
+    participantCount: /参与者 \[(?<value>[\d]+)\]/i,
+    finalBlow: /最后一击 (?<damage>[\d]+) (?<percent>[\d]+)%/i,
+    topDamage: /Наибольший урон (?<damage>[\d]+) (?<percent>[\d]+)%/i,
+    warpScrambleStrength: /跃迁干扰强度: (?<value>-?\d+\.?\d?)/i,
+    totalDamage: /总伤害量: (?<value>[\d]+)/i,
     isk: /(?<value>[\d,]+) ISK/i,
     playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
     corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
@@ -105,6 +122,11 @@ const TEXT = {
     finalBlow: 'Решающий удар',
     topDamage: 'Наибольший урон',
     warpScrambleStrength: ['Мощность глушения']
+  },
+  zh: {
+    finalBlow: '最后一击',
+    topDamage: '???',
+    warpScrambleStrength: ['跃迁干扰强度']
   }
 }
 
@@ -134,16 +156,6 @@ const runRegExOnString = (text, re) => {
   const { groups } = re.exec(text)
   return groups
 }
-
-// const runRegEx = (data, re) => {
-//   return _.chain(data)
-//   .find(t => re.test(t))
-//   .thru(v => {
-//     const { groups } = re.exec(v)
-//     return groups
-//   })
-//   .value()
-// }
 
 const closePoints = (point1, point2) => {
   if (Math.abs(point1.x - point2.x) > 16) return false
@@ -178,11 +190,13 @@ const regExIdx = (data, re) => {
 
 const findKillReportIdIdxAndLanguage = (lines) => {
   for (const lang of Object.keys(RES)) {
-    const re = RES[lang].killReportId
-    const idx = regExIdx(lines, re)
-    if (idx >= 0) return [idx, lang]
+    let idx = regExIdx(lines, RES[lang].killReportId)
+    if (idx >= 0) return [idx, lang, 'kill']
+
+    idx = regExIdx(lines, RES[lang].lossReportId)
+    if (idx >= 0) return [idx, lang, 'loss']
   }
-  return [null, null]
+  return [null, null, null]
 }
 
 const parsePlayerAndCorp = (text, lang) => {
@@ -213,7 +227,6 @@ const closestVertIdx = (data, wx, wy, vertIdx, skipIndexes) => {
 
     const dx = wx - x
     const dist = Math.sqrt(dx * dx + dy * dy)
-    // console.log('IIII', i, dist, closeDist, idx)
     if (dist < closeDist) {
       closeIdx = i
       closeDist = dist
@@ -272,14 +285,18 @@ const findVictim = (data, lang) => {
 
 const parseShipAndType = (line, ships) => {
   line = line.replace(/[^a-zA-Z ]/g, '').trim()
-  const shipTypes = _.chain(ships).map('type').uniq().value()
-  const shipTypeMap = Object.fromEntries(shipTypes.map(t => [t, t]).concat(shipTypes.map(t => [t.slice(0, -1), t])).concat(shipTypes.map(t => [t.slice(0, -2), t])))
+  const shipTypes = _.chain(ships).map(ship =>[ship.type, ship.enType]).uniq().value()
+  const shipTypeMap = Object.fromEntries(
+    shipTypes
+      .concat(shipTypes.map(([t, et]) => [t.slice(0, -1), et]))
+      .concat(shipTypes.map(([t, et]) => [t.slice(0, -2), et]))
+  )
   const shipType = matchString(line, Object.keys(shipTypeMap))
   console.log('SHIPPPP', shipType)
   if (!shipType) return [line, null]
 
-  const ship = matchString(line, _.map(ships, 'name'))
-  return [ship, shipTypeMap[shipType]]
+  const name = matchString(line, _.map(ships, 'name'))
+  return [_.find(ships, { name })?.enName, shipTypeMap[shipType]]
 }
 
 const getKillReport = async (guildId, hash, submittedBy, opts = {}) => {
@@ -345,7 +362,7 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
       t => _.trim(t)
     )
     const data = _.get(result, 'textAnnotations')
-    const lang = _.get(data, '0.locale')
+    const [killReportIdIdx, lang, type] = findKillReportIdIdxAndLanguage(lines)
     if (!lang) {
       killReport.status = 'ERROR'
       killReport.statusMessage = 'Cannot determine language'
@@ -354,14 +371,14 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
       const combined = combineBoxes(data)
       // console.log('COMBINEEE', data.length, combined.length, combined)
       killReport.lang = lang
+      killReport.type = type
 
-      const killReportIdIdx = regExIdx(lines, RES[lang].killReportId)
       if (killReportIdIdx < 0) {
         killReport.status = 'ERROR'
         killReport.statusMessage = 'Cannot find kill report id'
       }
       else {
-        killReport.killReportId = parseInt(_.get(runRegExOnString(lines[killReportIdIdx], RES[lang].killReportId), 'value'))
+        killReport.killReportId = parseInt(_.get(runRegExOnString(lines[killReportIdIdx], RES[lang][`${type}ReportId`]), 'value'))
         lines[killReportIdIdx] = null
 
         const duplicateKillReport = await KillReport.findOne({ where: { guildId, killReportId: killReport.killReportId, status: 'SUCCESS' }})
