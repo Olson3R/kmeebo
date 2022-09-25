@@ -34,7 +34,8 @@ const killReportExport = async (interaction) => {
       'finalBlowCorp',
       'finalBlowName',
       'topDamageCorp',
-      'topDamageName'
+      'topDamageName',
+      'sourceImage'
     ]
     const reports = _.map(killReports, km => _.map(headers, h => km[h]).join(','))
     const csv = Buffer.from(`${headers.join(',')}\n${reports.join('\n')}`, 'utf-8')
