@@ -6,6 +6,7 @@ const path = require('path')
 const { DateTime } = require('luxon')
 // const Fuse = require('fuse.js')
 const Finder = require('homoglyph-finder')
+const { Op } = require('sequelize')
 const _ = require('lodash')
 
 const GoogleAuth = require('../../config/google-cloud-credentials.json')
@@ -137,7 +138,7 @@ const matchString = (text, possibilities) => {
   }
 
   const partialMatch = _.get(Finder.search(text, possibilities), '0.word')
-  logger.info('Partial match', { text, possibilities, partialMatch })
+  // logger.info('Partial match', { text, possibilities, partialMatch })
   return partialMatch
 
   // const f = new Fuse(possibilities, { includeScore: true, threshold: 0.4 })
@@ -159,7 +160,7 @@ const runRegExOnString = (text, re) => {
 
 const closePoints = (point1, point2) => {
   if (Math.abs(point1.x - point2.x) > 16) return false
-  return Math.abs(point1.y - point2.y) <= 2
+  return Math.abs(point1.y - point2.y) <= 3
 }
 
 const combineBoxes = (data) => {
@@ -237,7 +238,7 @@ const closestVertIdx = (data, wx, wy, vertIdx, skipIndexes) => {
 }
 
 const findFinalBlow = (data, lang, ships) => {
-  let finalBlowIdx = _.findIndex(data, d => Finder.isMatches(d.description, TEXT[lang].finalBlow))
+  let finalBlowIdx = _.findIndex(data, d => d.description.startsWith(TEXT[lang].finalBlow))
   if (finalBlowIdx < 0) return { corp: null, player: null }
 
   const top = data[finalBlowIdx]
@@ -245,16 +246,16 @@ const findFinalBlow = (data, lang, ships) => {
   let closeIdx = closestVertIdx(data, wx, wy, 2, [finalBlowIdx])
   const match = _.get(Finder.search(data[closeIdx].description, _.map(ships, 'name')), '0')
   if (match) {
-    console.log('SHIPS NAME', data[closeIdx].description, match)
+    console.log('FINALL SHIPS NAME', data[closeIdx].description, match)
     closeIdx = closestVertIdx(data, wx, wy, 2, [finalBlowIdx, closeIdx])
   }
-  console.log('TOPP', finalBlowIdx, closeIdx, data[closeIdx].description)
+  console.log('FINALLL', finalBlowIdx, closeIdx, data[closeIdx].description)
 
   return parsePlayerAndCorp(data[closeIdx].description, lang)
 }
 
 const findTopDamage = (data, lang, ships) => {
-  let topIdx = _.findIndex(data, d => Finder.isMatches(d.description, TEXT[lang].topDamage))
+  let topIdx = _.findIndex(data, d => d.description.startsWith(TEXT[lang].topDamage))
   if (topIdx < 0) return { corp: null, player: null }
 
   const top = data[topIdx]
@@ -262,7 +263,7 @@ const findTopDamage = (data, lang, ships) => {
   let closeIdx = closestVertIdx(data, wx, wy, 2, [topIdx])
   const match = _.get(Finder.search(data[closeIdx].description, _.map(ships, 'name')), '0')
   if (match) {
-    console.log('SHIPS NAME', data[closeIdx].description, match)
+    console.log('TOPP SHIPS NAME', data[closeIdx].description, match)
     closeIdx = closestVertIdx(data, wx, wy, 2, [topIdx, closeIdx])
   }
   console.log('TOPP', topIdx, closeIdx, data[closeIdx].description)
@@ -341,7 +342,7 @@ const getResult = async (killReport, imageData, ext) => {
 
 const parseKillReport = async (guildId, submittedBy, filename, imageData, opts = {}) => {
   const hash = crypto.createHash('sha256').update(imageData).digest('base64')
-  logger.info(`HASHHH`, { hash, filename })
+  // logger.info(`HASHHH`, { hash, filename })
   const ext = path.extname(filename)
   const id = opts.reprocess && path.basename(filename, ext)
 
@@ -381,7 +382,12 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
         killReport.killReportId = parseInt(_.get(runRegExOnString(lines[killReportIdIdx], RES[lang][`${type}ReportId`]), 'value'))
         lines[killReportIdIdx] = null
 
-        const duplicateKillReport = await KillReport.findOne({ where: { guildId, killReportId: killReport.killReportId, status: 'SUCCESS' }})
+        const duplicateKillReport = await KillReport.findOne({ where: {
+          guildId,
+          id: { [Op.not]: killReport.id },
+          killReportId: killReport.killReportId,
+          status: 'SUCCESS'
+        }})
         if (duplicateKillReport) {
           logger.info("DUPLICATEEEE", { dkid: duplicateKillReport.killReportId, kid: killReport.killReportId })
           killReport.status = 'DUPLICATE'

@@ -7,7 +7,11 @@ const logger = require('./src/services/logger')
 const parseKillReport = require('./src/services/kill-report-parser')
 
 const KM_DIR = './kill-reports'
-const GUILD_ID = '770166688720879656'
+const GUILD_ID = process.argv[2]
+if (!GUILD_ID) {
+  console.error('Missing guild id argument')
+  process.exit(1)
+}
 const SUBMITTED_BY = 'spidermo#1871'
 
 const run = async () => {
