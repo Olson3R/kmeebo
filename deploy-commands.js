@@ -19,6 +19,9 @@ const commands = [
     ),
 
   new SlashCommandBuilder().setName('corporation').setDescription('Commands related to corporations.')
+    .addSubcommand(subcommand => subcommand.setName('leaderboard').setDescription('Show corporation kill report isk leaders based on final blow.')
+      .addIntegerOption(option => option.setName('days').setDescription('The number of days in the past to include kill reports from.'))
+    )
     .addSubcommand(subcommand => subcommand.setName('stats').setDescription('Show kills and losses for a corporation.')
       .addStringOption(option => option.setName('tag').setDescription('The Eve Echoes tag for the coropration.').setRequired(true))
     ),
@@ -30,6 +33,9 @@ const commands = [
     ),
 
   new SlashCommandBuilder().setName('pilot').setDescription('Commands related to pilots.')
+    .addSubcommand(subcommand => subcommand.setName('leaderboard').setDescription('Show pilot kill report isk leaders based on final blow.')
+      .addIntegerOption(option => option.setName('days').setDescription('The number of days in the past to include kill reports from.'))
+    )
     .addSubcommand(subcommand => subcommand.setName('stats').setDescription('Show kills and losses for a pilot.')
       .addStringOption(option => option.setName('pilot').setDescription('The Eve Echoes pilot name.').setRequired(true))
     )

@@ -5,9 +5,11 @@ const adminAddAdmin = require('./src/commands/admin-add-admin')
 const adminRemoveAdmin = require('./src/commands/admin-remove-admin')
 const adminRemoveChannel = require('./src/commands/admin-remove-channel')
 const adminSetupChannel = require('./src/commands/admin-setup-channel')
+const corporationLeaderboard = require('./src/commands/corporation-leaderboard')
 const corporationStats = require('./src/commands/corporation-stats')
 const killReportExport = require('./src/commands/kill-report-export')
 const killReportShow = require('./src/commands/kill-report-show')
+const pilotLeaderboard = require('./src/commands/pilot-leaderboard')
 const pilotStats = require('./src/commands/pilot-stats')
 
 const { killReportHandler } = require('./src/handlers/kill-report-handler')
@@ -52,7 +54,10 @@ client.on('interactionCreate', async interaction => {
   else if (commandName === 'corporation') {
     const subcommandName = options.getSubcommand()
 
-    if (subcommandName === 'stats') {
+    if (subcommandName === 'leaderboard') {
+      await corporationLeaderboard(interaction)
+    }
+    else if (subcommandName === 'stats') {
       await corporationStats(interaction)
     }
   }
@@ -69,7 +74,10 @@ client.on('interactionCreate', async interaction => {
   else if (commandName === 'pilot') {
     const subcommandName = options.getSubcommand()
 
-    if (subcommandName === 'stats') {
+    if (subcommandName === 'leaderboard') {
+      await pilotLeaderboard(interaction)
+    }
+    else if (subcommandName === 'stats') {
       await pilotStats(interaction)
     }
   }
