@@ -21,7 +21,7 @@ const RES = {
   de: {
     killReportId: /ABSCHUSSBERICHT [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
     lossReportId: /VERLUSTBERICHT [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
-    participantCount: /Teilnehmer \[(?<value>[\d]+)\]/i,
+    participantCount: /Teilnehmer\s*\[\s*(?<value>[\d]+)\s*\]/i,
     finalBlow: /Finaler Schlag (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Höchster Schaden (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /Warp-Störungsstärke: (?<value>-?\d+\.?\d?)/i,
@@ -34,7 +34,7 @@ const RES = {
   en: {
     killReportId: /KILL REPORT [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
     lossReportId: /LOSS REPORT [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
-    participantCount: /Participants \[(?<value>[\d]+)\]/i,
+    participantCount: /Participants\s*\[\s*(?<value>[\d]+)\s*\]/i,
     finalBlow: /Final Blow (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Top Damage (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /Warp S[co]ramble Strength: (?<value>-?\d+\.?\d?)/i,
@@ -47,7 +47,7 @@ const RES = {
   es: {
     killReportId: /INFORME DE MUERTES [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
     lossReportId: /INFORME DE PÉRDIDA [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i, // Guess
-    participantCount: /Participantes \[(?<value>[\d]+)\]/i,
+    participantCount: /Participantes\s*\[\s*(?<value>[\d]+)\s*\]/i,
     finalBlow: /Golpe de gracia (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Daño máximo (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /Potencia de los codificadores de impulsos: (?<value>-?\d+\.?\d?)/i,
@@ -60,7 +60,7 @@ const RES = {
   pt: {
     killReportId: /RELATÓRIO DE ABATES [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
     lossReportId: /RELATÓRIO DE DERROTA [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
-    participantCount: /Participantes \[(?<value>[\d]+)\]/i,
+    participantCount: /Participantes\s*\[\s*(?<value>[\d]+)\s*\]/i,
     finalBlow: /Golpe final (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Maior dano (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /Força do codificador de transpulsão: (?<value>-?\d+\.?\d?)/i,
@@ -73,7 +73,7 @@ const RES = {
   ru: {
     killReportId: /ОТЧЁТ О БОЕ [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
     lossReportId: /ОТЧЁТ ОБ УБЫТКАХ [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i, // Guess
-    participantCount: /Участники \[(?<value>[\d]+)\]/i,
+    participantCount: /Участники\s*\[\s*(?<value>[\d]+)\s*\]/i,
     finalBlow: /Решающий удар (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Наибольший урон (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /варп-двигателей: (?<value>-?\d+\.?\d?)/i,
@@ -86,7 +86,7 @@ const RES = {
   zh: {
     killReportId: /击毁报告 [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i,
     lossReportId: /损失报告 [\[\(][I1][D0]:(?<value>[\d]+)[\]\)]/i, // Guess
-    participantCount: /参与者 \[(?<value>[\d]+)\]/i,
+    participantCount: /参与者\s*\[\s*(?<value>[\d]+)\s*\]/i,
     finalBlow: /最后一击 (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Наибольший урон (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /跃迁干扰强度: (?<value>-?\d+\.?\d?)/i,
@@ -234,20 +234,28 @@ const closestVertIdx = (data, wx, wy, vertIdx, skipIndexes) => {
     }
   }
 
+  console.log('CLOSE DIST', closeDist)
   return closeIdx
 }
 
 const findFinalBlow = (data, lang, ships) => {
   let finalBlowIdx = _.findIndex(data, d => d.description.startsWith(TEXT[lang].finalBlow))
   if (finalBlowIdx < 0) return { corp: null, player: null }
+  const skips = [finalBlowIdx]
 
   const top = data[finalBlowIdx]
   const { x: wx, y: wy } = top.boundingPoly.vertices[0]
-  let closeIdx = closestVertIdx(data, wx, wy, 2, [finalBlowIdx])
+  let closeIdx = closestVertIdx(data, wx, wy, 2, skips)
   const match = _.get(Finder.search(data[closeIdx].description, _.map(ships, 'name')), '0')
   if (match) {
     console.log('FINALL SHIPS NAME', data[closeIdx].description, match)
-    closeIdx = closestVertIdx(data, wx, wy, 2, [finalBlowIdx, closeIdx])
+    skips.push(closeIdx)
+    closeIdx = closestVertIdx(data, wx, wy, 2, skips)
+  }
+  if (RES[lang].participantCount.test(data[closeIdx].description)) {
+    console.log('FINALL SKIP PARTICIPANT', data[closeIdx].description)
+    skips.push(closeIdx)
+    closeIdx = closestVertIdx(data, wx, wy, 2, skips)
   }
   console.log('FINALLL', finalBlowIdx, closeIdx, data[closeIdx].description)
 
