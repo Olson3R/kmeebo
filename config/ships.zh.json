@@ -169,6 +169,7 @@
   { "type": "Destroyer", "name": "Corax Assault", "enType": "Destroyer", "enName": "Corax Assault"  },
   { "type": "Destroyer", "name": "Corax II Assault", "enType": "Destroyer", "enName": "Corax II Assault"  },
   { "type": "Destroyer", "name": "Corax Sniper", "enType": "Destroyer", "enName": "Corax Sniper"  },
+  { "type": "Destroyer", "name": "Corax Trainer", "enType": "Destroyer", "enName": "Corax Trainer"  },
   { "type": "Destroyer", "name": "Corax", "enType": "Destroyer", "enName": "Corax"  },
   { "type": "Destroyer", "name": "Cormorant Covert Ops", "enType": "Destroyer", "enName": "Cormorant Covert Ops"  },
   { "type": "Destroyer", "name": "Cormorant Guardian", "enType": "Destroyer", "enName": "Cormorant Guardian"  },
@@ -282,6 +283,7 @@
   { "type": "Industrial Ship", "name": "Venture II", "enType": "Industrial Ship", "enName": "Venture II"  },
   { "type": "Industrial Ship", "name": "Venture III", "enType": "Industrial Ship", "enName": "Venture III"  },
   { "type": "Industrial Ship", "name": "Venture IV", "enType": "Industrial Ship", "enName": "Venture IV"  },
+  { "type": "Industrial Ship", "name": "Venture Trainer", "enType": "Industrial Ship", "enName": "Venture Trainer"  },
   { "type": "Industrial Ship", "name": "Venture", "enType": "Industrial Ship", "enName": "Venture"  },
   { "type": "Industrial Ship", "name": "Wreathe II", "enType": "Industrial Ship", "enName": "Wreathe II"  },
   { "type": "Industrial Ship", "name": "Wreathe", "enType": "Industrial Ship", "enName": "Wreathe" }

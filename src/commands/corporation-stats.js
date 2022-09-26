@@ -36,6 +36,23 @@ const corporationStats = async (interaction) => {
       `**Largest Loss** ${formatNumber(_.maxBy(lossReports, 'isk')?.isk)}`
   }
 
+  const monthlyKillReports = _.filter(killReports, km => km.killedAt >= now.minus({ days: 30 }))
+  const monthlyLossReports = _.filter(lossReports, km => km.killedAt >= now.minus({ days: 30 }))
+  const monthlyIskKilled = _.sumBy(monthlyKillReports, 'isk')
+  const monthlyIskLost = _.sumBy(monthlyLossReports, 'isk')
+
+  const monthly = {
+    type: 'rich',
+    color: colors.yellow,
+    title: '30 Day Stats',
+    description: `**Kills** ${formatNumber(monthlyKillReports.length)}\n` +
+      `**Isk Killed** ${formatNumber(monthlyIskKilled)}\n` +
+      `**Avg Isk/Kill** ${formatNumber(monthlyIskKilled / monthlyKillReports.length)}\n\n` +
+      `**Losses** ${formatNumber(monthlyLossReports.length)}\n` +
+      `**Isk Lost** ${formatNumber(_.sumBy(monthlyLossReports, 'isk'))}\n` +
+      `**Avg Isk/Loss** ${formatNumber(monthlyIskLost / monthlyLossReports.length)}`
+  }
+
   const weeklyKillReports = _.filter(killReports, km => km.killedAt >= now.minus({ days: 7 }))
   const weeklyLossReports = _.filter(lossReports, km => km.killedAt >= now.minus({ days: 7 }))
   const weeklyIskKilled = _.sumBy(weeklyKillReports, 'isk')
@@ -53,8 +70,6 @@ const corporationStats = async (interaction) => {
       `**Avg Isk/Loss** ${formatNumber(weeklyIskLost / weeklyLossReports.length)}`
   }
 
-
-
   const dailyKillReports = _.filter(killReports, km => km.killedAt >= now.minus({ days: 1 }))
   const dailyLossReports = _.filter(lossReports, km => km.killedAt >= now.minus({ days: 1 }))
   const dailyIskKilled = _.sumBy(dailyKillReports, 'isk')
@@ -71,7 +86,7 @@ const corporationStats = async (interaction) => {
       `**Isk Lost** ${formatNumber(_.sumBy(dailyLossReports, 'isk'))}\n` +
       `**Avg Isk/Loss** ${formatNumber(dailyIskLost / dailyLossReports.length)}`
   }
-  await interaction.reply({ content: `Corporation stats for ${corporationTag}`, embeds: [lifetime, weekly, daily] })
+  await interaction.reply({ content: `Corporation stats for ${corporationTag}`, embeds: [lifetime, monthly, weekly, daily] })
 }
 
 module.exports = corporationStats
