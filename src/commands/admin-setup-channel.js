@@ -2,11 +2,22 @@ const { DateTime } = require('luxon')
 const _ = require('lodash')
 
 const colors = require('../color-util')
+const { isAdmin } = require('../util')
 const { Channel } = require('../models')
 
 const adminSetupChannel = async (interaction) => {
   const updatedBy = interaction.user.tag
   const guildId = interaction.guildId
+  if (!(await isAdmin(guildId, updatedBy))) {
+    const embed = {
+      color: colors.red,
+      title: 'Not An Admin',
+      description: 'Admin permission is required for this command.'
+    }
+    await interaction.reply({ embeds: [embed] })
+    return
+  }
+
   const channelId = interaction.channelId
   const killTag = interaction.options.getString('kill-tag')
 

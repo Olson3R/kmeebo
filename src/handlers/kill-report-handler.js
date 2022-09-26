@@ -4,6 +4,7 @@ const _ = require('lodash')
 
 const colors = require('../color-util')
 const parseKillReport = require('../services/kill-report-parser')
+const { Channel } = require('../models')
 
 const IMAGE_CONTENT_TYPE = /^image\//
 
@@ -24,7 +25,10 @@ const getDescription = km => {
 }
 
 const killReportHandler = async message => {
-  if (!config.Discord.listenChannels.includes(message.channel.id)) return
+  const guildId = message.guildId
+  const channelId = message.channelId
+  const channel = await Channel.findOne({ where: { guildId, channelId }})
+  if (!channel) return
 
   console.log(`${message.author.tag} in #${message.channel.name} created a message. ${message.attachments.size}`)
   if (message.attachments.size > 0) {
@@ -39,7 +43,13 @@ const killReportHandler = async message => {
       const imageData = await getImageAttachment(attachment.url)
 
       try {
-        const killReport = await parseKillReport(guildId, submittedBy, attachment.name, imageData, { url: attachment.url })
+        const killReport = await parseKillReport(
+          guildId,
+          submittedBy,
+          attachment.name,
+          imageData,
+          { url: attachment.url, killTag: channel.killTag }
+        )
         killReports.push(killReport)
       }
       catch(e) {

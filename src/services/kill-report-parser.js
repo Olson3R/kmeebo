@@ -311,17 +311,30 @@ const parseShipAndType = (line, ships) => {
 const getKillReport = async (guildId, hash, submittedBy, opts = {}) => {
   if (opts.id) {
     const matched =  await KillReport.findOne({ where: { guildId, id: opts.id }})
-    if (matched) return matched
+    if (matched) {
+      if (opts.killTag && !matched.killTag) {
+        matched.killTag = opts.killTag
+        await matched.save()
+      }
+      return matched
+    }
   }
   else {
     const matched = await KillReport.findOne({ where: { guildId, hash, status: 'SUCCESS' } })
-    if (matched) return matched
+    if (matched) {
+      if (opts.killTag && !matched.killTag) {
+        matched.killTag = opts.killTag
+        await matched.save()
+      }
+      return matched
+    }
   }
 
   return KillReport.create({
     id: opts.id,
     guildId,
     sourceImage: opts.url,
+    killTag: opts.killTag,
     submittedBy,
     hash,
     status: 'PROCESSING'
@@ -354,9 +367,18 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
   const ext = path.extname(filename)
   const id = opts.reprocess && path.basename(filename, ext)
 
-  const killReport = await getKillReport(guildId, hash, submittedBy, { id, url: opts.url })
+  const killReport = await getKillReport(
+    guildId,
+    hash,
+    submittedBy,
+    { id, url: opts.url, killTag: opts.killTag })
+
   if (killReport.status === 'SUCCESS' && opts.reprocess !== true) {
     killReport.duplicate = true
+    if (opts.killTag && !killReport.killTag) {
+      killReport.killTag = opts.killTag
+      await killReport.save()
+    }
     return killReport
   }
 
@@ -401,6 +423,11 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
           killReport.status = 'DUPLICATE'
           killReport.statusMessage = `Duplicate of ${duplicateKillReport.id}`
           await killReport.save()
+
+          if (opts.killTag && !duplicateKillReport.killTag) {
+            duplicateKillReport.killTag = opts.killTag
+            await duplicateKillReport.save()
+          }
 
           duplicateKillReport.duplicate = true
           return duplicateKillReport
