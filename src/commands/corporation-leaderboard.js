@@ -15,8 +15,12 @@ const formatNumber = (text) => {
 const corporationLeaderboard = async (interaction) => {
   const guildId = interaction.guildId
   const days = interaction.options.getInteger('days')
+  const killTag = interaction.options.getString('kill-tag')
 
   const where = { guildId, finalBlowCorp: { [Op.ne]: null }, status: 'SUCCESS' }
+  if (killTag) {
+    where['killTag'] = killTag
+  }
   if (days > 0) {
     where['killedAt'] = { [Op.gt]: DateTime.now().minus({ days }).toJSDate() }
   }
@@ -36,7 +40,7 @@ console.log('LLLL', leaderboard)
   const embed = {
     type: 'rich',
     color: colors.green,
-    title: `${days ? `${days} Day` : 'Lifetime'} Corporation Leaderboard`,
+    title: `${days ? `${days} Day` : 'Lifetime'} Corporation Leaderboard${killTag ? ` For Kill Tag ${killTag}`: ''}`,
     description: _.map(leaderboard, (row, index) => `**${index + 1}. ${row.finalBlowCorp}** ${formatNumber(row.isk)} Isk (Kills: ${formatNumber(row.kills)})`).join('\n')
   }
 
