@@ -36,6 +36,9 @@ const killReportShow = async (interaction) => {
       { name: 'Final Blow', value: `[${killReport.finalBlowCorp || '???'}] ${killReport.finalBlowName || '???'}` },
       { name: 'Top Damage', value: `[${killReport.topDamageCorp || '???'}] ${killReport.topDamageName || '???'}` }
     ]
+    if (killReport.killTag) {
+      fields.push({ name: 'Kill Tag', value: killReport.killTag })
+    }
 
     const embed = {
       color: colors.green,

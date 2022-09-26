@@ -21,7 +21,13 @@ const getColor = km => {
 
 const getDescription = km => {
   if (km.status === 'ERROR') return `${km.id}\n${km.statusMessage ?? 'Unkown error'}`
-  return `${km.id}\n${km.killReportId} | ${km.isk?.toLocaleString()} ISK | [${km.finalBlowCorp ?? '???'}] ${km.finalBlowName}`
+  const fields = [
+    km.killReportId,
+    `${km.isk?.toLocaleString()} ISK`,
+    `[${km.finalBlowCorp ?? '???'}] ${km.finalBlowName}`
+  ]
+  if (km.killTag) fields.push(km.killTag)
+  return `${km.id}\n${fields.join(' | ')}`
 }
 
 const killReportHandler = async message => {
