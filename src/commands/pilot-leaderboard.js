@@ -18,7 +18,7 @@ const pilotLeaderboard = async (interaction) => {
 
   const where = { guildId, finalBlowName: { [Op.ne]: null }, status: 'SUCCESS' }
   if (days > 0) {
-    where[killedAt] = { [Op.gt]: DateTime.now().minus({ days }).toJSDate() }
+    where['killedAt'] = { [Op.gt]: DateTime.now().minus({ days }).toJSDate() }
   }
   const leaderboard = await KillReport.findAll({
     where,
