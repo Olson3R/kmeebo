@@ -10,7 +10,9 @@ const corporationStats = require('./src/commands/corporation-stats')
 const killReportExport = require('./src/commands/kill-report-export')
 const killReportShow = require('./src/commands/kill-report-show')
 const pilotLeaderboard = require('./src/commands/pilot-leaderboard')
+const pilotRegister = require('./src/commands/pilot-register')
 const pilotStats = require('./src/commands/pilot-stats')
+const userLeaderboard = require('./src/commands/user-leaderboard')
 
 const { killReportHandler } = require('./src/handlers/kill-report-handler')
 
@@ -77,8 +79,18 @@ client.on('interactionCreate', async interaction => {
     if (subcommandName === 'leaderboard') {
       await pilotLeaderboard(interaction)
     }
+    else if (subcommandName === 'register') {
+      await pilotRegister(interaction)
+    }
     else if (subcommandName === 'stats') {
       await pilotStats(interaction)
+    }
+  }
+  else if (commandName === 'user') {
+    const subcommandName = options.getSubcommand()
+
+    if (subcommandName === 'leaderboard') {
+      await userLeaderboard(interaction)
     }
   }
 })

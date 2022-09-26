@@ -38,8 +38,20 @@ const commands = [
       .addIntegerOption(option => option.setName('days').setDescription('The number of days in the past to include kill reports from.'))
       .addStringOption(option => option.setName('kill-tag').setDescription('The kill tag to limit kill reports to.'))
     )
+    .addSubcommand(subcommand => subcommand.setName('register').setDescription('Register your pilot names.')
+      .addStringOption(option => option.setName('name').setDescription('The Eve Echoes pilot name.').setRequired(true))
+    )
+    .addSubcommand(subcommand => subcommand.setName('remove').setDescription('Remove a pilot.')
+      .addStringOption(option => option.setName('name').setDescription('The name of the Eve Echoes pilot to remove.').setRequired(true))
+    )
     .addSubcommand(subcommand => subcommand.setName('stats').setDescription('Show kills and losses for a pilot.')
       .addStringOption(option => option.setName('pilot').setDescription('The Eve Echoes pilot name.').setRequired(true))
+    ),
+
+  new SlashCommandBuilder().setName('user').setDescription('Commands related to users.')
+    .addSubcommand(subcommand => subcommand.setName('leaderboard').setDescription('Show user kill report isk leaders based on final blow.')
+      .addIntegerOption(option => option.setName('days').setDescription('The number of days in the past to include kill reports from.'))
+      .addStringOption(option => option.setName('kill-tag').setDescription('The kill tag to limit kill reports to.'))
     )
 ]
   .map(command => command.toJSON());
