@@ -24,11 +24,11 @@ const RES = {
     participantCount: /Teilnehmer\s*\[\s*(?<value>[\d]+)\s*\]/i,
     finalBlow: /Finaler Schlag (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Höchster Schaden (?<damage>[\d]+) (?<percent>[\d]+)%/i,
-    warpScrambleStrength: /Warp-Störungsstärke: (?<value>-?\d+\.?\d?)/i,
+    warpScrambleStrength: /Warp-Störungsstärke:\s*(?<value>-?\d+\.?\d?)/i,
     totalDamage: /Gesamtschaden: (?<value>[\d]+)/i,
     isk: /(?<value>[\d,]+) ISK/i,
-    playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
-    corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
+    playerAndCorp: /^\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
+    corp: /^\s*\[\s*(?<corp>\w+)\s*\]\s*/,
     time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
   },
   en: {
@@ -102,7 +102,7 @@ const TEXT = {
   de: {
     finalBlow: 'Finaler Schlag',
     topDamage: 'Höchster Schaden',
-    warpScrambleStrength: ['Warp-Störungsstärke']
+    warpScrambleStrength: ['Warp Störungsstärke']
   },
   en: {
     finalBlow: 'Final Blow',
