@@ -23,7 +23,7 @@ const commands = [
       .addIntegerOption(option => option.setName('days').setDescription('The number of days in the past to include kill reports from.'))
       .addStringOption(option => option.setName('kill-tag').setDescription('The kill tag to limit kill reports to.'))
     )
-    .addSubcommand(subcommand => subcommand.setName('stats').setDescription('Show kills and losses for a corporation.')
+    .addSubcommand(subcommand => subcommand.setName('stats').setDescription('Show kill and loss stats for a corporation.')
       .addStringOption(option => option.setName('tag').setDescription('The Eve Echoes tag for the coropration.').setRequired(true))
     ),
 
@@ -44,7 +44,7 @@ const commands = [
     .addSubcommand(subcommand => subcommand.setName('remove').setDescription('Remove a pilot.')
       .addStringOption(option => option.setName('name').setDescription('The name of the Eve Echoes pilot to remove.').setRequired(true))
     )
-    .addSubcommand(subcommand => subcommand.setName('stats').setDescription('Show kills and losses for a pilot.')
+    .addSubcommand(subcommand => subcommand.setName('stats').setDescription('Show kill and loss stats for a pilot.')
       .addStringOption(option => option.setName('pilot').setDescription('The Eve Echoes pilot name.').setRequired(true))
     ),
 

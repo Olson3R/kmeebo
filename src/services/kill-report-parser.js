@@ -63,7 +63,7 @@ const RES = {
     participantCount: /Participantes\s*\[\s*(?<value>[\d]+)\s*\]/i,
     finalBlow: /Golpe final (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Maior dano (?<damage>[\d]+) (?<percent>[\d]+)%/i,
-    warpScrambleStrength: /Força do codificador de transpulsão: (?<value>-?\d+\.?\d?)/i,
+    warpScrambleStrength: /Força d[ao] codificador de transpulsão:\s*(?<value>-?\d+\.?\d?)?/i,
     totalDamage: /Dano total: (?<value>[\d]+)/i,
     isk: /(?<value>[\d,]+) ISK/i,
     playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
@@ -117,7 +117,7 @@ const TEXT = {
   pt: {
     finalBlow: 'Golpe final',
     topDamage: 'Maior dano',
-    warpScrambleStrength: ['Força do codificador de transpulsão']
+    warpScrambleStrength: ['Força do codificador de transpulsão', 'Força da codificação de transpulsão']
   },
   ru: {
     finalBlow: 'Решающий удар',
