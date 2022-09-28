@@ -1,5 +1,3 @@
-const _ = require('lodash')
-
 module.exports = (sequelize, DataTypes) => {
   const Channel = sequelize.define('Channel', {
     id: {
@@ -20,15 +18,19 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
+    forwardToChannelId: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     updatedBy: {
       type: DataTypes.STRING,
       allowNull: false
-    },
+    }
   }, {
     timestamps: true,
     indexes: [
       { fields: ['guildId'] },
-      { fields: ['channelId'] },
+      { fields: ['channelId'] }
     ]
   })
 

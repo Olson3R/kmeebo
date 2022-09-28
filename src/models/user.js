@@ -1,5 +1,3 @@
-const _ = require('lodash')
-
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
     id: {
@@ -23,12 +21,12 @@ module.exports = (sequelize, DataTypes) => {
     updatedBy: {
       type: DataTypes.STRING,
       allowNull: false
-    },
+    }
   }, {
     timestamps: true,
     indexes: [
       { fields: ['guildId'] },
-      { fields: ['discordTag'] },
+      { fields: ['discordTag'] }
     ]
   })
 

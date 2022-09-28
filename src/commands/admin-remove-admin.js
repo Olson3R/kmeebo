@@ -1,6 +1,3 @@
-const { DateTime } = require('luxon')
-const _ = require('lodash')
-
 const colors = require('../color-util')
 const { isAdmin } = require('../util')
 const { User } = require('../models')
@@ -21,18 +18,17 @@ const adminRemoveAdmin = async (interaction) => {
   const userToRemove = interaction.options.getUser('user')
 
   try {
-    const user = await User.findOne({ where: { guildId, discordTag: userToRemove.tag }})
+    const user = await User.findOne({ where: { guildId, discordTag: userToRemove.tag } })
     if (user) {
       await user.destroy()
 
       const embed = {
         color: colors.green,
         title: 'Removed Admin',
-        description: `The user \`${user.discordTag}\` will no longer be able to use admin commands.`,
+        description: `The user \`${user.discordTag}\` will no longer be able to use admin commands.`
       }
       await interaction.reply({ embeds: [embed] })
-    }
-    else {
+    } else {
       const embed = {
         color: colors.green,
         title: 'Admin Not Found',
@@ -40,8 +36,7 @@ const adminRemoveAdmin = async (interaction) => {
       }
       await interaction.reply({ embeds: [embed] })
     }
-  }
-  catch(e) {
+  } catch (e) {
     const embed = {
       color: colors.red,
       title: 'Error Removing Admin',

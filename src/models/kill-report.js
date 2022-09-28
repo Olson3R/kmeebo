@@ -1,5 +1,3 @@
-const _ = require('lodash')
-
 module.exports = (sequelize, DataTypes) => {
   const KillReport = sequelize.define('KillReport', {
     id: {
@@ -115,7 +113,7 @@ module.exports = (sequelize, DataTypes) => {
     hash: {
       type: DataTypes.STRING,
       allowNull: true
-    },
+    }
   }, {
     timestamps: true,
     indexes: [

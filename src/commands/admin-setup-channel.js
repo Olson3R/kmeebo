@@ -1,4 +1,3 @@
-const { DateTime } = require('luxon')
 const _ = require('lodash')
 
 const colors = require('../color-util')
@@ -8,6 +7,7 @@ const { Channel } = require('../models')
 const adminSetupChannel = async (interaction) => {
   const updatedBy = interaction.user.tag
   const guildId = interaction.guildId
+
   if (!(await isAdmin(guildId, updatedBy))) {
     const embed = {
       color: colors.red,
@@ -33,20 +33,19 @@ const adminSetupChannel = async (interaction) => {
     const fields = [
       { name: 'Name', value: interaction.channel.name },
       { name: 'Id', value: channelId },
-      { name: 'Kill Tag', value: killTag ?? '*None*' },
+      { name: 'Kill Tag', value: killTag ?? '*None*' }
     ]
 
     const ending = _.isNil(killTag) ? 'without a kill tag' : `with kill tag \`${killTag}\``
     const embed = {
       color: colors.green,
-      title: `Setup Channel For Processing Kill Reports!`,
+      title: 'Setup Channel For Processing Kill Reports!',
       description: `Kill reports will now be processed in this channel ${ending}.`,
       footer: { text: channel.id },
       fields
     }
     await interaction.reply({ embeds: [embed] })
-  }
-  catch(e) {
+  } catch (e) {
     const embed = {
       color: colors.red,
       title: 'Error Setting Up Channel For Processing Kill Reports',

@@ -1,5 +1,5 @@
-const { SlashCommandBuilder, Routes } = require('discord.js');
-const { REST } = require('@discordjs/rest');
+const { SlashCommandBuilder, Routes } = require('discord.js')
+const { REST } = require('@discordjs/rest')
 const config = require('config')
 // const { clientId, token } = require('./config.json');
 
@@ -8,11 +8,21 @@ const commands = [
     .addSubcommand(subcommand => subcommand.setName('add-admin').setDescription('Add an admin user.')
       .addUserOption(option => option.setName('user').setDescription('The user to give admin permissions to.').setRequired(true))
     )
+    .addSubcommand(subcommand => subcommand.setName('allow-corp-forwarding').setDescription('Allow a corporation\'s guild to post messages to a channel.')
+      .addStringOption(option => option.setName('corp-guild-id').setDescription('The id of the corporation\'s guild to allow messages from.').setRequired(true))
+      .addChannelOption(option => option.setName('forwardable-channel').setDescription('The channel to allow messages to be forwarded to.').setRequired(true))
+    )
+    .addSubcommand(subcommand => subcommand.setName('remove-corp-forwarding').setDescription('Remove a corporation\'s guild permission to post messages to a channel.')
+      .addStringOption(option => option.setName('corp-guild-id').setDescription('The id of the corporation\'s guild to allow messages from.').setRequired(true))
+      .addChannelOption(option => option.setName('forwardable-channel').setDescription('The channel to allow messages to be forwarded to.').setRequired(false))
+    )
     .addSubcommand(subcommand => subcommand.setName('remove-admin').setDescription('Remove an admin user.')
       .addUserOption(option => option.setName('user').setDescription('The user to remove admin permissions from.').setRequired(true))
     )
+    .addSubcommand(subcommand => subcommand.setName('kill-report-forwarding').setDescription('Configure kill report forwarding to an external channel.'))
     .addSubcommand(subcommand => subcommand.setName('setup-channel').setDescription('Setup up a channel for tracking kill reports.')
       .addStringOption(option => option.setName('kill-tag').setDescription('An optional tag to associate all kills with.'))
+      .addStringOption(option => option.setName('forward-to-channel-id').setDescription('Optionally forward kill reports to another channel.'))
     )
     .addSubcommand(subcommand => subcommand.setName('remove-channel').setDescription('Remove a channel from tracking kill reports.')
       .addChannelOption(option => option.setName('channel').setDescription('The channel to stop processing kill reports for.'))
@@ -53,11 +63,12 @@ const commands = [
       .addIntegerOption(option => option.setName('days').setDescription('The number of days in the past to include kill reports from.'))
       .addStringOption(option => option.setName('kill-tag').setDescription('The kill tag to limit kill reports to.'))
     )
+    .addSubcommand(subcommand => subcommand.setName('stats').setDescription('Show kill and loss stats for a user\'s pilots.'))
 ]
-  .map(command => command.toJSON());
+  .map(command => command.toJSON())
 
-const rest = new REST({ version: '10' }).setToken(config.Discord.botToken);
+const rest = new REST({ version: '10' }).setToken(config.Discord.botToken)
 
 rest.put(Routes.applicationCommands(config.Discord.clientId), { body: commands })
   .then((data) => console.log(`Successfully registered ${data.length} application commands.`))
-  .catch(console.error);
+  .catch(console.error)

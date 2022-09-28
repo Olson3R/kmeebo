@@ -19,10 +19,10 @@ const corporationLeaderboard = async (interaction) => {
 
   const where = { guildId, finalBlowCorp: { [Op.ne]: null }, status: 'SUCCESS' }
   if (killTag) {
-    where['killTag'] = killTag
+    where.killTag = killTag
   }
   if (days > 0) {
-    where['killedAt'] = { [Op.gt]: DateTime.now().minus({ days }).toJSDate() }
+    where.killedAt = { [Op.gt]: DateTime.now().minus({ days }).toJSDate() }
   }
   const leaderboard = await KillReport.findAll({
     where,
@@ -36,11 +36,11 @@ const corporationLeaderboard = async (interaction) => {
     limit: 10,
     raw: true
   })
-console.log('LLLL', leaderboard)
+  console.log('LLLL', leaderboard)
   const embed = {
     type: 'rich',
     color: colors.green,
-    title: `${days ? `${days} Day` : 'Lifetime'} Corporation Leaderboard${killTag ? ` For Kill Tag ${killTag}`: ''}`,
+    title: `${days ? `${days} Day` : 'Lifetime'} Corporation Leaderboard${killTag ? ` For Kill Tag ${killTag}` : ''}`,
     description: _.map(leaderboard, (row, index) => `**${index + 1}. ${row.finalBlowCorp}** ${formatNumber(row.isk)} Isk (Kills: ${formatNumber(row.kills)})`).join('\n')
   }
 

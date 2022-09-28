@@ -1,5 +1,4 @@
 const axios = require('axios')
-const config = require('config')
 const _ = require('lodash')
 
 const colors = require('../color-util')
@@ -9,7 +8,7 @@ const { Channel } = require('../models')
 const IMAGE_CONTENT_TYPE = /^image\//
 
 const getImageAttachment = async (url) => {
-  const response = await axios.get(url, { responseType: 'arraybuffer'})
+  const response = await axios.get(url, { responseType: 'arraybuffer' })
   return Buffer.from(response.data, 'binary')
 }
 
@@ -30,10 +29,10 @@ const getDescription = km => {
   return `${km.id}\n${fields.join(' | ')}`
 }
 
-const killReportHandler = async message => {
+const killReportHandler = async (message, client) => {
   const guildId = message.guildId
   const channelId = message.channelId
-  const channel = await Channel.findOne({ where: { guildId, channelId }})
+  const channel = await Channel.findOne({ where: { guildId, channelId } })
   if (!channel) return
 
   console.log(`${message.author.tag} in #${message.channel.name} created a message. ${message.attachments.size}`)
@@ -57,8 +56,7 @@ const killReportHandler = async message => {
           { url: attachment.url, killTag: channel.killTag }
         )
         killReports.push(killReport)
-      }
-      catch(e) {
+      } catch (e) {
         console.error(e)
         message.react('❌')
       }
@@ -79,11 +77,9 @@ const killReportHandler = async message => {
       .value()
     if (status === 'DUPLICATE') {
       await message.react('©️')
-    }
-    if (status === 'ERROR') {
+    } else if (status === 'ERROR') {
       await message.react('❌')
-    }
-    else {
+    } else {
       await message.react('✅')
     }
 
@@ -92,6 +88,16 @@ const killReportHandler = async message => {
       description: getDescription(km)
     }))
     await message.reply({ embeds })
+
+    if (!channel.forwardToChannelId) return
+
+    const successfulKillReports = killReports.filter(killReport => killReport.status === 'SUCCESS' && !killReport.duplicate)
+    if (successfulKillReports.length === 0) return
+
+    const forwardToChannel = client.channels.cache.get(channel.forwardToChannelId)
+    if (!forwardToChannel) return
+
+    await forwardToChannel.send({ content: `**From:** ${message.guild.name}`, files: _.map(successfulKillReports, 'sourceImage') })
   }
 }
 

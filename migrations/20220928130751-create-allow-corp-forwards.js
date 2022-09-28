@@ -2,7 +2,7 @@
 
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('Users', {
+    await queryInterface.createTable('AllowCorpForwards', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
@@ -12,11 +12,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      discordTag: {
+      forwardableChannelId: {
         type: Sequelize.STRING,
         allowNull: false
       },
-      type: {
+      corpGuildId: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -34,6 +34,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('Users')
+    await queryInterface.dropTable('AllowCorpForwards')
   }
 }

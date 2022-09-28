@@ -1,5 +1,3 @@
-const _ = require('lodash')
-
 const colors = require('../color-util')
 const { Pilot } = require('../models')
 
@@ -9,7 +7,7 @@ const pilotRegister = async (interaction) => {
   const name = interaction.options.getString('name')
 
   try {
-    const existingPilot = await Pilot.findOne({ where: { guildId, name }})
+    const existingPilot = await Pilot.findOne({ where: { guildId, name } })
     if (existingPilot) {
       const fields = [
         { name: 'Pilot', value: existingPilot.name },
@@ -37,8 +35,7 @@ const pilotRegister = async (interaction) => {
       footer: { text: pilot.id }
     }
     await interaction.reply({ embeds: [embed] })
-  }
-  catch(e) {
+  } catch (e) {
     const embed = {
       color: colors.red,
       title: 'Error Registering Pilot',

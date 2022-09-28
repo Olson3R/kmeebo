@@ -1,4 +1,3 @@
-const { DateTime } = require('luxon')
 const _ = require('lodash')
 
 const colors = require('../color-util')
@@ -31,19 +30,18 @@ const adminAddAdmin = async (interaction) => {
 
     const fields = [
       { name: 'User', value: user.discordTag },
-      { name: 'Type', value: user.type },
+      { name: 'Type', value: user.type }
     ]
 
     const embed = {
       color: colors.green,
       title: 'Added Admin User',
-      description: `This user can now use admin commands.`,
+      description: 'This user can now use admin commands.',
       footer: { text: user.id },
       fields
     }
     await interaction.reply({ embeds: [embed] })
-  }
-  catch(e) {
+  } catch (e) {
     const embed = {
       color: colors.red,
       title: 'Error Adding Admin User',

@@ -2,7 +2,6 @@ const fs = require('fs')
 const path = require('path')
 const _ = require('lodash')
 
-
 const logger = require('./src/services/logger')
 const parseKillReport = require('./src/services/kill-report-parser')
 
@@ -27,8 +26,7 @@ const run = async () => {
       await parseKillReport(GUILD_ID, SUBMITTED_BY, imageFile, imageData, { reprocess: true })
     }
     logger.info('Done reprocessing')
-  }
-  catch(e) {
+  } catch (e) {
     logger.error('Failed to reprocess kill reports', { errors: e.errors, error: e.message, stackTrace: e.stack })
   }
 }

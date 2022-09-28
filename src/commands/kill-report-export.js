@@ -1,4 +1,3 @@
-const { Attachment } = require('discord.js')
 const _ = require('lodash')
 
 const colors = require('../color-util')
@@ -8,9 +7,13 @@ const killReportExport = async (interaction) => {
   // interaction.deferReply()
 
   const guildId = interaction.guildId
+  const killTag = interaction.options.getString('kill-tag')
+
+  const where = { guildId, status: 'SUCCESS' }
+  if (killTag) where.killTag = killTag
 
   const killReports = await KillReport.findAll({
-    where: { guildId, status: 'SUCCESS' },
+    where,
     order: [['killedAt', 'ASC']]
   })
 
@@ -44,15 +47,14 @@ const killReportExport = async (interaction) => {
 
     const embed = {
       color: colors.green,
-      title: `Exported ${killReports.length} kill reports`,
+      title: `Exported ${killReports.length} kill reports`
     }
-    await interaction.reply({ embeds: [embed], files: [{ attachment: csv, name: 'kill-report-export.csv'}] })
+    await interaction.reply({ embeds: [embed], files: [{ attachment: csv, name: 'kill-report-export.csv' }] })
     // await interaction.reply({ embeds: [embed], attachments: [new AttachmentBuilder(csv, { name: 'kmeebo-export.csv'})] })
-  }
-  else {
+  } else {
     const embed = {
       color: colors.red,
-      title: `Could not find any kill reports`
+      title: 'Could not find any kill reports'
     }
     await interaction.reply({ embeds: [embed], ephemeral: true })
   }

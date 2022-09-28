@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Pilot = sequelize.define('Pilot', {
+  const AllowCorpForward = sequelize.define('AllowCorpForward', {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -10,11 +10,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
-    discordTag: {
+    corpGuildId: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    name: {
+    forwardableChannelId: {
       type: DataTypes.STRING,
       allowNull: false
     },
@@ -26,10 +26,10 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
     indexes: [
       { fields: ['guildId'] },
-      { fields: ['discordTag'] },
-      { fields: ['name'] }
+      { fields: ['corpGuildId'] },
+      { fields: ['forwardableChannelId'] }
     ]
   })
 
-  return Pilot
+  return AllowCorpForward
 }

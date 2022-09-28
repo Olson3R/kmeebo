@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -48,7 +48,7 @@ module.exports = {
         allowNull: true
       },
       warpScrambleStrength: {
-        type: Sequelize.DECIMAL(15,1),
+        type: Sequelize.DECIMAL(15, 1),
         allowNull: true
       },
       totalDamage: {
@@ -136,4 +136,4 @@ module.exports = {
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('KillReports')
   }
-};
+}

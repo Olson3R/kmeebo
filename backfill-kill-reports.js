@@ -1,5 +1,5 @@
 const axios = require('axios')
-const { Client, GatewayIntentBits, SystemChannelFlagsBitField } = require('discord.js')
+const { Client, GatewayIntentBits } = require('discord.js')
 const config = require('config')
 const _ = require('lodash')
 
@@ -8,7 +8,7 @@ const parseKillReport = require('./src/services/kill-report-parser')
 const IMAGE_CONTENT_TYPE = /^image\//
 
 const getImageAttachment = async (url) => {
-  const response = await axios.get(url, { responseType: 'arraybuffer'})
+  const response = await axios.get(url, { responseType: 'arraybuffer' })
   return Buffer.from(response.data, 'binary')
 }
 
@@ -24,13 +24,13 @@ const client = new Client({
 client.once('ready', async () => {
   console.log(`Starting backfill for channel id ${process.argv[2]}!`)
 
-  const channel = client.channels.cache.get(process.argv[2]);
+  const channel = client.channels.cache.get(process.argv[2])
   console.log(`Channel ${channel.name}`)
 
   let messageId = null
   let messages = await channel.messages.fetch({ limit: 100 })
   while (messages.size > 0) {
-    console.log(`Received ${messages.size} messages`);
+    console.log(`Received ${messages.size} messages`)
     for (const message of messages.values()) {
       messageId = message.id
 
@@ -58,8 +58,7 @@ client.once('ready', async () => {
         try {
           const killReport = await parseKillReport(guildId, submittedBy, attachment.name, imageData, { url: attachment.url })
           killReports.push(killReport)
-        }
-        catch(e) {
+        } catch (e) {
           console.error(e)
           message.react('❌')
         }
@@ -83,8 +82,7 @@ client.once('ready', async () => {
       }
       if (status === 'ERROR') {
         await message.react('❌')
-      }
-      else {
+      } else {
         await message.react('✅')
       }
     }

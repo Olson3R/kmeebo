@@ -20,7 +20,7 @@ const killReportShow = async (interaction) => {
   const guildId = interaction.guildId
   const id = interaction.options.getString('id')
 
-  const killReport = await KillReport.findOne({ where: { id, guildId }})
+  const killReport = await KillReport.findOne({ where: { id, guildId } })
 
   if (killReport) {
     const fields = [
@@ -48,8 +48,7 @@ const killReportShow = async (interaction) => {
       fields
     }
     await interaction.reply({ embeds: [embed] })
-  }
-  else {
+  } else {
     const embed = {
       color: colors.red,
       title: `Could not find kill report for id ${id}`

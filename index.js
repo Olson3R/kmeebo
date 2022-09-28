@@ -2,6 +2,9 @@ const { Client, GatewayIntentBits } = require('discord.js')
 const config = require('config')
 
 const adminAddAdmin = require('./src/commands/admin-add-admin')
+const adminAllowCorpForwarding = require('./src/commands/admin-allow-corp-forwarding')
+const adminRemoveCorpForwarding = require('./src/commands/admin-remove-corp-forwarding')
+const { adminKillReportForwarding, adminKillReportForwardingSubmit } = require('./src/commands/admin-kill-report-forwarding')
 const adminRemoveAdmin = require('./src/commands/admin-remove-admin')
 const adminRemoveChannel = require('./src/commands/admin-remove-channel')
 const adminSetupChannel = require('./src/commands/admin-setup-channel')
@@ -31,72 +34,66 @@ client.once('ready', () => {
 })
 
 client.on('interactionCreate', async interaction => {
-  if (!interaction.isChatInputCommand()) return
+  if (interaction.isChatInputCommand()) {
+    console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`, interaction.options.getSubcommand())
 
-  console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`, interaction.options.getSubcommand())
+    const { commandName, options } = interaction
+    const subCommandName = options.getSubcommand()
 
-  const { commandName, options } = interaction
-
-  if (commandName === 'admin') {
-    const subcommandName = options.getSubcommand()
-
-    if (subcommandName === 'add-admin') {
-      await adminAddAdmin(interaction)
+    const commandMapping = {
+      admin: {
+        'add-admin': adminAddAdmin,
+        'allow-corp-forwarding': adminAllowCorpForwarding,
+        'kill-report-forwarding': adminKillReportForwarding,
+        'remove-admin': adminRemoveAdmin,
+        'remove-channel': adminRemoveChannel,
+        'remove-corp-forwarding': adminRemoveCorpForwarding,
+        'setup-channel': adminSetupChannel
+      },
+      corporation: {
+        leaderboard: corporationLeaderboard,
+        stats: corporationStats
+      },
+      'kill-report': {
+        export: killReportExport,
+        show: killReportShow
+      },
+      pilot: {
+        leaderboard: pilotLeaderboard,
+        register: pilotRegister,
+        stats: pilotStats
+      },
+      user: {
+        leaderboard: userLeaderboard
+      }
     }
-    else if (subcommandName === 'remove-admin') {
-      await adminRemoveAdmin(interaction)
-    }
-    else if (subcommandName === 'remove-channel') {
-      await adminRemoveChannel(interaction)
-    }
-    else if (subcommandName === 'setup-channel') {
-      await adminSetupChannel(interaction)
+
+    if (commandName && subCommandName) {
+      await commandMapping[commandName][subCommandName](interaction, client)
+    } else {
+      await commandMapping[commandName](interaction, client)
     }
   }
-  else if (commandName === 'corporation') {
-    const subcommandName = options.getSubcommand()
+  // else if (interaction.isModalSubmit()) {
+  //   const { customId } = interaction
 
-    if (subcommandName === 'leaderboard') {
-      await corporationLeaderboard(interaction)
-    }
-    else if (subcommandName === 'stats') {
-      await corporationStats(interaction)
-    }
-  }
-  else if (commandName === 'kill-report') {
-    const subcommandName = options.getSubcommand()
+  //   const mapping = {}
 
-    if (subcommandName === 'export') {
-      await killReportExport(interaction)
-    }
-    else if (subcommandName === 'show') {
-      await killReportShow(interaction)
-    }
-  }
-  else if (commandName === 'pilot') {
-    const subcommandName = options.getSubcommand()
+  //   mapping[customId] && await mapping[customId](interaction)
+  // }
+  else if (interaction.isSelectMenu()) {
+    const { customId } = interaction
 
-    if (subcommandName === 'leaderboard') {
-      await pilotLeaderboard(interaction)
+    const selectMenuMapping = {
+      forwardToChannelId: adminKillReportForwardingSubmit
     }
-    else if (subcommandName === 'register') {
-      await pilotRegister(interaction)
-    }
-    else if (subcommandName === 'stats') {
-      await pilotStats(interaction)
-    }
-  }
-  else if (commandName === 'user') {
-    const subcommandName = options.getSubcommand()
 
-    if (subcommandName === 'leaderboard') {
-      await userLeaderboard(interaction)
-    }
+    await selectMenuMapping[customId](interaction, client)
   }
 })
 
 client.on('messageCreate', async message => {
-  await killReportHandler(message)
+  await killReportHandler(message, client)
 })
 
 // Login to Discord with your client's token

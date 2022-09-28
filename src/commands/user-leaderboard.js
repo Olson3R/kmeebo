@@ -28,8 +28,8 @@ const userLeaderboard = async (interaction) => {
     'SELECT Pilots.discordTag, COUNT(*) as `kills`, SUM(KillReports.isk) as `isk`' +
     ' FROM Pilots INNER JOIN KillReports ON KillReports.finalBlowName = Pilots.name' +
     ' WHERE Pilots.guildId = :guildId AND KillReports.guildId = :guildId AND KillReports.status = \'SUCCESS\'' +
-    (days > 0 ? ` AND KillReports.killedAt > :killedAtDate` : '') +
-    (killTag ? ` AND KillReports.killTag = :killTag` : '') +
+    (days > 0 ? ' AND KillReports.killedAt > :killedAtDate' : '') +
+    (killTag ? ' AND KillReports.killTag = :killTag' : '') +
     ' GROUP BY Pilots.discordTag' +
     ' ORDER BY isk DESC' +
     ' LIMIT 10',
@@ -46,7 +46,7 @@ const userLeaderboard = async (interaction) => {
   const embed = {
     type: 'rich',
     color: colors.green,
-    title: `${days ? `${days} Day` : 'Lifetime'} User Leaderboard${killTag ? ` For Kill Tag ${killTag}`: ''}`,
+    title: `${days ? `${days} Day` : 'Lifetime'} User Leaderboard${killTag ? ` For Kill Tag ${killTag}` : ''}`,
     description: _.map(leaderboard, (row, index) => `**${index + 1}. ${row.discordTag}** ${formatNumber(row.isk)} Isk (Kills: ${formatNumber(row.kills)})`).join('\n')
   }
 

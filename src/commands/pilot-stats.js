@@ -21,8 +21,8 @@ const pilotStats = async (interaction) => {
   const guildId = interaction.guildId
   const pilotName = interaction.options.getString('pilot')
 
-  const killReports = await KillReport.findAll({ where: { guildId, finalBlowName: pilotName, status: 'SUCCESS' }})
-  const lossReports = await KillReport.findAll({ where: { guildId, victimName: pilotName, status: 'SUCCESS' }})
+  const killReports = await KillReport.findAll({ where: { guildId, finalBlowName: pilotName, status: 'SUCCESS' } })
+  const lossReports = await KillReport.findAll({ where: { guildId, victimName: pilotName, status: 'SUCCESS' } })
 
   const now = DateTime.now()
   const iskKilled = _.sumBy(killReports, 'isk')
@@ -57,8 +57,6 @@ const pilotStats = async (interaction) => {
       `**Isk Lost** ${formatNumber(_.sumBy(weeklyLossReports, 'isk'))}\n` +
       `**Avg Isk/Loss** ${formatNumber(weeklyIskLost / weeklyLossReports.length)}`
   }
-
-
 
   const dailyKillReports = _.filter(killReports, km => km.killedAt >= now.minus({ days: 1 }))
   const dailyLossReports = _.filter(lossReports, km => km.killedAt >= now.minus({ days: 1 }))

@@ -1,9 +1,8 @@
-const winston = require('winston');
-const WinstonRotate = require('winston-daily-rotate-file');
-const { env } = require('config')
+const winston = require('winston')
+require('winston-daily-rotate-file')
 
 const transports = [
-  new  winston.transports.DailyRotateFile ({
+  new winston.transports.DailyRotateFile({
     filename: 'application-%DATE%.log',
     dirname: './logs/',
     level: 'info',

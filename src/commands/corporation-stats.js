@@ -15,8 +15,8 @@ const corporationStats = async (interaction) => {
   const guildId = interaction.guildId
   const corporationTag = interaction.options.getString('tag')
 
-  const killReports = await KillReport.findAll({ where: { guildId, finalBlowCorp: corporationTag, status: 'SUCCESS' }})
-  const lossReports = await KillReport.findAll({ where: { guildId, victimCorp: corporationTag, status: 'SUCCESS' }})
+  const killReports = await KillReport.findAll({ where: { guildId, finalBlowCorp: corporationTag, status: 'SUCCESS' } })
+  const lossReports = await KillReport.findAll({ where: { guildId, victimCorp: corporationTag, status: 'SUCCESS' } })
 
   const now = DateTime.now()
   const iskKilled = _.sumBy(killReports, 'isk')

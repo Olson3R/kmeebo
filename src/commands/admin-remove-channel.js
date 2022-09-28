@@ -1,6 +1,3 @@
-const { DateTime } = require('luxon')
-const _ = require('lodash')
-
 const colors = require('../color-util')
 const { isAdmin } = require('../util')
 const { Channel } = require('../models')
@@ -22,7 +19,7 @@ const adminRemoveChannel = async (interaction) => {
   const channelId = channel.id
 
   try {
-    const channelToRemove = await Channel.findOne({ where: { guildId, channelId }})
+    const channelToRemove = await Channel.findOne({ where: { guildId, channelId } })
     if (channelToRemove) {
       await channelToRemove.destroy()
 
@@ -33,8 +30,7 @@ const adminRemoveChannel = async (interaction) => {
         footer: { text: channelToRemove.id }
       }
       await interaction.reply({ embeds: [embed] })
-    }
-    else {
+    } else {
       const embed = {
         color: colors.green,
         title: 'Channel Not Tracked',
@@ -42,8 +38,7 @@ const adminRemoveChannel = async (interaction) => {
       }
       await interaction.reply({ embeds: [embed] })
     }
-  }
-  catch(e) {
+  } catch (e) {
     const embed = {
       color: colors.red,
       title: 'Error Removing Channel',
