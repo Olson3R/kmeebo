@@ -41,6 +41,12 @@ const adminSetupChannel = async (interaction) => {
       {name: 'EmbedLinks', value: interaction.appPermissions.has(PermissionsBitField.Flags.EmbedLinks) },
       {name: 'SendMessages', value: interaction.appPermissions.has(PermissionsBitField.Flags.SendMessages) },
       {name: 'SendMessagesInThreads', value: interaction.appPermissions.has(PermissionsBitField.Flags.SendMessagesInThreads) },
+
+      {name: 'ManageChannels', value: interaction.appPermissions.has(PermissionsBitField.Flags.ManageChannels) },
+      {name: 'ManageEvents', value: interaction.appPermissions.has(PermissionsBitField.Flags.ManageEvents) },
+      {name: 'ManageGuild', value: interaction.appPermissions.has(PermissionsBitField.Flags.ManageGuild) },
+      {name: 'ManageMessages', value: interaction.appPermissions.has(PermissionsBitField.Flags.ManageMessages) },
+      {name: 'ViewChannel', value: interaction.appPermissions.has(PermissionsBitField.Flags.ViewChannel) },
     ], { value: false }).map(p => p.name)
 // logger.info('PERMSSS', { channel:  interaction.channel })
     const fields = [
