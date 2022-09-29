@@ -35,7 +35,7 @@ client.once('ready', () => {
 })
 
 client.on('interactionCreate', async interaction => {
-  logger.info(`MMMMM ${interaction.user.tag} in #${interaction.channel.name} created a interaction. ${interaction.appPermissions}`)
+  logger.info(`MMMMM ${interaction.user.tag} in #${interaction.channel.name} created a interaction. ${interaction}`)
   if (interaction.isChatInputCommand()) {
     console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`, interaction.options.getSubcommand())
 
