@@ -47,7 +47,7 @@ const adminSetupChannel = async (interaction) => {
       { name: 'Name', value: interaction.channel.name },
       { name: 'Id', value: channelId },
       { name: 'Kill Tag', value: killTag ?? '*None*' },
-      { name: 'App Permission', value: interaction.appPermissions.valueOf() },
+      { name: 'App Permission', value: interaction.appPermissions.toLocaleString() },
     ]
     if (perms.length > 0) fields.push({ name: 'Missing Channel Permissions', value: perms.join(', ') })
 
