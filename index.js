@@ -18,6 +18,7 @@ const pilotStats = require('./src/commands/pilot-stats')
 const userLeaderboard = require('./src/commands/user-leaderboard')
 
 const { killReportHandler } = require('./src/handlers/kill-report-handler')
+const logger = require('./src/services/logger')
 
 // Create a new client instance
 const client = new Client({
@@ -93,6 +94,7 @@ client.on('interactionCreate', async interaction => {
 })
 
 client.on('messageCreate', async message => {
+  logger.info(`MMMMM ${message.author.tag} in #${message.channel.name} created a message. ${message.attachments.size}`)
   await killReportHandler(message, client)
 })
 
