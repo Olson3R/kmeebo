@@ -32,30 +32,31 @@ const adminSetupChannel = async (interaction) => {
     channel.killTag = killTag
     await channel.save()
 
-    const perms = _.filter([
-      {name: 'AddReactions', value: interaction.appPermissions.has(PermissionsBitField.Flags.AddReactions) },
-      {name: 'ReadMessageHistory', value: interaction.appPermissions.has(PermissionsBitField.Flags.ReadMessageHistory) },
-      {name: 'AttachFiles', value: interaction.appPermissions.has(PermissionsBitField.Flags.AttachFiles) },
-      {name: 'CreatePrivateThreads', value: interaction.appPermissions.has(PermissionsBitField.Flags.CreatePrivateThreads) },
-      {name: 'CreatePublicThreads', value: interaction.appPermissions.has(PermissionsBitField.Flags.CreatePublicThreads) },
-      {name: 'EmbedLinks', value: interaction.appPermissions.has(PermissionsBitField.Flags.EmbedLinks) },
-      {name: 'SendMessages', value: interaction.appPermissions.has(PermissionsBitField.Flags.SendMessages) },
-      {name: 'SendMessagesInThreads', value: interaction.appPermissions.has(PermissionsBitField.Flags.SendMessagesInThreads) },
+    const missingPermissions = _.filter(
+      [
+        'AddReactions',
+        'ReadMessageHistory',
+        'AttachFiles',
+        'CreatePrivateThreads',
+        'CreatePublicThreads',
+        'EmbedLinks',
+        'SendMessages',
+        'SendMessagesInThreads',
+        // 'ManageChannels',
+        // 'ManageEvents',
+        // 'ManageGuild',
+        // 'ManageMessages',
+        'ViewChannel',
+      ],
+      perm => !interaction.appPermissions.has(PermissionsBitField.Flags[perm])
+    )
 
-      {name: 'ManageChannels', value: interaction.appPermissions.has(PermissionsBitField.Flags.ManageChannels) },
-      {name: 'ManageEvents', value: interaction.appPermissions.has(PermissionsBitField.Flags.ManageEvents) },
-      {name: 'ManageGuild', value: interaction.appPermissions.has(PermissionsBitField.Flags.ManageGuild) },
-      {name: 'ManageMessages', value: interaction.appPermissions.has(PermissionsBitField.Flags.ManageMessages) },
-      {name: 'ViewChannel', value: interaction.appPermissions.has(PermissionsBitField.Flags.ViewChannel) },
-    ], { value: false }).map(p => p.name)
-// logger.info('PERMSSS', { channel:  interaction.channel })
     const fields = [
       { name: 'Name', value: interaction.channel.name },
       { name: 'Id', value: channelId },
-      { name: 'Kill Tag', value: killTag ?? '*None*' },
-      { name: 'App Permission', value: interaction.appPermissions.toLocaleString() },
+      { name: 'Kill Tag', value: killTag ?? '*None*' }
     ]
-    if (perms.length > 0) fields.push({ name: 'Missing Channel Permissions', value: perms.join(', ') })
+    if (missingPermissions.length > 0) fields.push({ name: 'Missing Channel Permissions', value: missingPermissions.join(', ') })
 
     const ending = _.isNil(killTag) ? 'without a kill tag' : `with kill tag \`${killTag}\``
     const embed = {

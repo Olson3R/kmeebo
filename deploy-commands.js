@@ -22,7 +22,6 @@ const commands = [
     .addSubcommand(subcommand => subcommand.setName('kill-report-forwarding').setDescription('Configure kill report forwarding to an external channel.'))
     .addSubcommand(subcommand => subcommand.setName('setup-channel').setDescription('Setup up a channel for tracking kill reports.')
       .addStringOption(option => option.setName('kill-tag').setDescription('An optional tag to associate all kills with.'))
-      .addStringOption(option => option.setName('forward-to-channel-id').setDescription('Optionally forward kill reports to another channel.'))
     )
     .addSubcommand(subcommand => subcommand.setName('remove-channel').setDescription('Remove a channel from tracking kill reports.')
       .addChannelOption(option => option.setName('channel').setDescription('The channel to stop processing kill reports for.'))

@@ -20,7 +20,7 @@ const killReportShow = async (interaction) => {
   const guildId = interaction.guildId
   const id = interaction.options.getString('id')
 
-  const killReport = await KillReport.findOne({ where: { id, guildId } })
+  const killReport = await KillReport.findOne({ where: { id, guildId }, include: 'sourceImage' })
 
   if (killReport) {
     const fields = [
@@ -43,7 +43,7 @@ const killReportShow = async (interaction) => {
     const embed = {
       color: colors.green,
       title: `Parsed kill mail ${killReport.killReportId}`,
-      image: { url: killReport.sourceImage },
+      image: { url: killReport.sourceImage?.url },
       footer: { text: killReport.id },
       fields
     }

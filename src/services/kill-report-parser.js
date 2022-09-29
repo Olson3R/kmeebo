@@ -11,7 +11,7 @@ const _ = require('lodash')
 
 const GoogleAuth = require('../../config/google-cloud-credentials.json')
 const Systems = require('../../config/systems.json')
-const { KillReport } = require('../models')
+const { KillReport, SourceImage } = require('../models')
 const logger = require('./logger')
 
 const REGIONS = _.chain(Systems).map('region').uniq().value()
@@ -306,8 +306,8 @@ const parseShipAndType = (line, ships) => {
 }
 
 const getKillReport = async (guildId, hash, submittedBy, opts = {}) => {
-  if (opts.id) {
-    const matched = await KillReport.findOne({ where: { guildId, id: opts.id } })
+  if (opts.sourceImageId) {
+    const matched = await KillReport.findOne({ where: { guildId, sourceImageId: opts.sourceImageId } })
     if (matched) {
       if (opts.killTag && !matched.killTag) {
         matched.killTag = opts.killTag
@@ -315,37 +315,49 @@ const getKillReport = async (guildId, hash, submittedBy, opts = {}) => {
       }
       return matched
     }
-  } else {
-    const matched = await KillReport.findOne({ where: { guildId, hash, status: 'SUCCESS' } })
-    if (matched) {
-      if (opts.killTag && !matched.killTag) {
-        matched.killTag = opts.killTag
-        await matched.save()
-      }
-      return matched
+    return null
+  }
+
+  const sourceImage = _.first(await SourceImage.findOrCreate({
+    where: { hash },
+    defaults: { url: opts.url }
+  }))
+
+  const [killReport, created] = await KillReport.findOrCreate({
+    where: { guildId, sourceImageId: sourceImage.id },
+    defaults: {
+      id: opts.id,
+      killTag: opts.killTag,
+      submittedBy,
+      status: 'PROCESSING'
+    }
+  })
+
+  if (!created) {
+    if (opts.killTag && !killReport.killTag) {
+      killReport.killTag = opts.killTag
+      await killReport.save()
+    }
+
+    if (killReport.status !== 'SUCCESS') {
+      killReport.status = 'PROCESSING'
     }
   }
 
-  return KillReport.create({
-    id: opts.id,
-    guildId,
-    sourceImage: opts.url,
-    killTag: opts.killTag,
-    submittedBy,
-    hash,
-    status: 'PROCESSING'
-  })
+  killReport.sourceImage = sourceImage
+
+  return killReport
 }
 
 const getResult = async (killReport, imageData, ext) => {
   // Save file to disk
-  const imageFile = `${KM_DIR}/${killReport.id}${ext}`
+  const imageFile = `${KM_DIR}/${killReport.sourceImageId}${ext}`
   if (!fs.existsSync(imageFile)) {
     await fsp.writeFile(imageFile, imageData)
   }
 
   // Process with Google Vision API
-  const googleVisionFile = `${KM_DIR}/${killReport.id}.gv.json`
+  const googleVisionFile = `${KM_DIR}/${killReport.sourceImageId}.gv.json`
   if (fs.existsSync(googleVisionFile)) {
     return JSON.parse(await fsp.readFile(googleVisionFile))
   } else {
@@ -366,7 +378,9 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
     guildId,
     hash,
     submittedBy,
-    { id, url: opts.url, killTag: opts.killTag })
+    { id, url: opts.url, killTag: opts.killTag }
+  )
+  if (!killReport) return null
 
   if (killReport.status === 'SUCCESS' && opts.reprocess !== true) {
     killReport.duplicate = true

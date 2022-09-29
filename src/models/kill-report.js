@@ -90,9 +90,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
-    sourceImage: {
+    sourceImageId: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: false
     },
     submittedBy: {
       type: DataTypes.STRING,
@@ -107,10 +107,6 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
     lang: {
-      type: DataTypes.STRING,
-      allowNull: true
-    },
-    hash: {
       type: DataTypes.STRING,
       allowNull: true
     }
@@ -134,9 +130,13 @@ module.exports = (sequelize, DataTypes) => {
       { fields: ['system'] },
       { fields: ['submittedBy'] },
       { fields: ['status'] },
-      { fields: ['hash'] }
+      { fields: ['sourceImageId'] }
     ]
   })
+
+  KillReport.associate = ({ SourceImage }) => {
+    KillReport.belongsTo(SourceImage, { as: 'sourceImage' })
+  }
 
   return KillReport
 }

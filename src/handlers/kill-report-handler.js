@@ -26,7 +26,7 @@ const getDescription = km => {
     `[${km.finalBlowCorp ?? '???'}] ${km.finalBlowName}`
   ]
   if (km.killTag) fields.push(km.killTag)
-  return `${km.id}\n${fields.join(' | ')}`
+  return `${km.duplicate ? 'Duplicate of ' : ''}${km.id}\n${fields.join(' | ')}`
 }
 
 const killReportHandler = async (message, client) => {
@@ -97,7 +97,7 @@ const killReportHandler = async (message, client) => {
     const forwardToChannel = client.channels.cache.get(channel.forwardToChannelId)
     if (!forwardToChannel) return
 
-    await forwardToChannel.send({ content: `**From:** ${message.guild.name}`, files: _.map(successfulKillReports, 'sourceImage') })
+    await forwardToChannel.send({ content: `**From:** ${message.guild.name}`, files: _.map(successfulKillReports, 'sourceImage.url') })
   }
 }
 
