@@ -35,6 +35,7 @@ client.once('ready', () => {
 })
 
 client.on('interactionCreate', async interaction => {
+
   if (interaction.isChatInputCommand()) {
     console.log(`${interaction.user.tag} in #${interaction.channel.name} triggered an interaction.`, interaction.options.getSubcommand())
 
@@ -94,7 +95,7 @@ client.on('interactionCreate', async interaction => {
 })
 
 client.on('messageCreate', async message => {
-  logger.info(`MMMMM ${message.author.tag} in #${message.channel.name} created a message. ${message.attachments.size}`)
+  logger.info(`MMMMM ${message.author.tag} in #${message.channel.name} created a message. ${message.appPermissions}`)
   await killReportHandler(message, client)
 })
 
