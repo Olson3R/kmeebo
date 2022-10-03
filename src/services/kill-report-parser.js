@@ -372,13 +372,13 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
   const hash = crypto.createHash('sha256').update(imageData).digest('base64')
   // logger.info(`HASHHH`, { hash, filename })
   const ext = path.extname(filename)
-  const id = opts.reprocess && path.basename(filename, ext)
+  const sourceImageId = opts.reprocess && path.basename(filename, ext)
 
   const killReport = await getKillReport(
     guildId,
     hash,
     submittedBy,
-    { id, url: opts.url, killTag: opts.killTag }
+    { sourceImageId, url: opts.url, killTag: opts.killTag }
   )
   if (!killReport) return null
 
