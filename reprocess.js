@@ -22,7 +22,7 @@ const run = async () => {
     })
     for (const file of files) {
       const imageFile = `${KM_DIR}/${file}`
-      if (!(await fsp.access(imageFile, fs.constants.F_OK))) contine
+      if (!(await fsp.access(imageFile, fs.constants.F_OK))) continue
 
       logger.info(`Processing file ${file}`)
       const imageData = fs.readFileSync(imageFile)
