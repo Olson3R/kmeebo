@@ -21,10 +21,10 @@ const run = async () => {
       return ext && !['.csv', '.json'].includes(ext)
     })
     for (const file of files) {
-      if (!(await fsp.access(file, fs.constants.F_OK))) contine
+      const imageFile = `${KM_DIR}/${file}`
+      if (!(await fsp.access(imageFile, fs.constants.F_OK))) contine
 
       logger.info(`Processing file ${file}`)
-      const imageFile = `${KM_DIR}/${file}`
       const imageData = fs.readFileSync(imageFile)
       await parseKillReport(GUILD_ID, SUBMITTED_BY, imageFile, imageData, { reprocess: true })
     }
