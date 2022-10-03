@@ -22,9 +22,12 @@ const run = async () => {
     })
     for (const file of files) {
       const imageFile = `${KM_DIR}/${file}`
-      if (!(await fsp.access(imageFile, fs.constants.F_OK))) continue
 
       logger.info(`Processing file ${file}`)
+      if (!(await fsp.access(imageFile, fs.constants.F_OK))) {
+        logger.info('\tFile missing')
+        continue
+      }
       const imageData = fs.readFileSync(imageFile)
       await parseKillReport(GUILD_ID, SUBMITTED_BY, imageFile, imageData, { reprocess: true })
     }
