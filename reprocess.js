@@ -1,4 +1,5 @@
 const fs = require('fs')
+const fsp = require('fs/promises')
 const path = require('path')
 const _ = require('lodash')
 
@@ -20,7 +21,7 @@ const run = async () => {
       return ext && !['.csv', '.json'].includes(ext)
     })
     for (const file of files) {
-      if (!fs.access(file, fs.constants.F_OK)) contine
+      if (!(await fsp.access(file, fs.constants.F_OK))) contine
 
       logger.info(`Processing file ${file}`)
       const imageFile = `${KM_DIR}/${file}`
