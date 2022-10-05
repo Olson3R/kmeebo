@@ -17,7 +17,6 @@ const logger = require('./logger')
 const REGIONS = _.chain(Systems).map('region').uniq().value()
 const KM_DIR = './kill-reports'
 const RES = {
-
   de: {
     killReportId: /ABSCHUSSBERICHT [[(][I1][D0]:(?<value>[\d]+)[\])]/i,
     lossReportId: /VERLUSTBERICHT [[(][I1][D0]:(?<value>[\d]+)[\])]/i,
@@ -46,12 +45,25 @@ const RES = {
   },
   es: {
     killReportId: /INFORME DE MUERTES [[(][I1][D0]:(?<value>[\d]+)[\])]/i,
-    lossReportId: /INFORME DE PÉRDIDA [[(][I1][D0]:(?<value>[\d]+)[\])]/i, // Guess
+    lossReportId: /INFORME DE PÉRDIDA [[(][I1][D0]:(?<value>[\d]+)[\])]/i,
     participantCount: /Participantes\s*\[\s*(?<value>[\d]+)\s*\]/i,
     finalBlow: /Golpe de gracia (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Daño máximo (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /impulsos: (?<value>-?\d+\.?\d?)/i,
     totalDamage: /Daño total: (?<value>[\d]+)/i,
+    isk: /(?<value>[\d,]+) ISK/i,
+    playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
+    corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
+    time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
+  },
+  fr: {
+    killReportId: /RAPPORT DE VICTIME [[(][I1][D0]:(?<value>[\d]+)[\])]/i,
+    lossReportId: /LOSS REPORT [[(][I1][D0]:(?<value>[\d]+)[\])]/i, // ???
+    participantCount: /Participants\s*\[\s*(?<value>[\d]+)\s*\]/i,
+    finalBlow: /Coup de grâce\s*(?<damage>[\d]+) (?<percent>[\d]+)%/i,
+    topDamage: /Meilleurs dégâts\s*(?<damage>[\d]+) (?<percent>[\d]+)%/i,
+    warpScrambleStrength: /Puissance d'inhibition de warp: (?<value>-?\d+\.?\d?)/i,
+    totalDamage: /Dégâts totaux\s*:\s*(?<value>[\d]+)/i,
     isk: /(?<value>[\d,]+) ISK/i,
     playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
     corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
@@ -113,6 +125,11 @@ const TEXT = {
     finalBlow: 'Golpe de gracia',
     topDamage: 'Daño máximo',
     warpScrambleStrength: ['Potencia de los codificadores de']
+  },
+  fr: {
+    finalBlow: 'Coup de grâce',
+    topDamage: 'Meilleurs dégâts',
+    warpScrambleStrength: ['Puissance d\'inhibition de warp']
   },
   pt: {
     finalBlow: 'Golpe final',
@@ -231,7 +248,7 @@ const closestVertIdx = (data, wx, wy, vertIdx, skipIndexes) => {
     }
   }
 
-  console.log('CLOSE DIST', closeDist)
+  // console.log('CLOSE DIST', closeDist)
   return closeIdx
 }
 
@@ -245,16 +262,16 @@ const findFinalBlow = (data, lang, ships) => {
   let closeIdx = closestVertIdx(data, wx, wy, 2, skips)
   const match = _.get(Finder.search(data[closeIdx].description, _.map(ships, 'name')), '0')
   if (match) {
-    console.log('FINALL SHIPS NAME', data[closeIdx].description, match)
+    // console.log('FINALL SHIPS NAME', data[closeIdx].description, match)
     skips.push(closeIdx)
     closeIdx = closestVertIdx(data, wx, wy, 2, skips)
   }
   if (RES[lang].participantCount.test(data[closeIdx].description)) {
-    console.log('FINALL SKIP PARTICIPANT', data[closeIdx].description)
+    // console.log('FINALL SKIP PARTICIPANT', data[closeIdx].description)
     skips.push(closeIdx)
     closeIdx = closestVertIdx(data, wx, wy, 2, skips)
   }
-  console.log('FINALLL', finalBlowIdx, closeIdx, data[closeIdx].description)
+  // console.log('FINALLL', finalBlowIdx, closeIdx, data[closeIdx].description)
 
   return parsePlayerAndCorp(data[closeIdx].description, lang)
 }
@@ -268,17 +285,17 @@ const findTopDamage = (data, lang, ships) => {
   let closeIdx = closestVertIdx(data, wx, wy, 2, [topIdx])
   const match = _.get(Finder.search(data[closeIdx].description, _.map(ships, 'name')), '0')
   if (match) {
-    console.log('TOPP SHIPS NAME', data[closeIdx].description, match)
+    // console.log('TOPP SHIPS NAME', data[closeIdx].description, match)
     closeIdx = closestVertIdx(data, wx, wy, 2, [topIdx, closeIdx])
   }
-  console.log('TOPP', topIdx, closeIdx, data[closeIdx].description)
+  // console.log('TOPP', topIdx, closeIdx, data[closeIdx].description)
 
   return parsePlayerAndCorp(data[closeIdx].description, lang)
 }
 
 const findVictim = (data, lang) => {
   const warpIdx = _.findIndex(data, d => Finder.search(d.description, TEXT[lang].warpScrambleStrength).length)
-  console.log('WWWWARP', warpIdx)
+  // console.log('WWWWARP', warpIdx)
   if (warpIdx < 0) return { corp: null, player: null }
 
   const warp = data[warpIdx]
@@ -290,7 +307,7 @@ const findVictim = (data, lang) => {
 }
 
 const parseShipAndType = (line, ships) => {
-  line = line.replace(/[^a-zA-Z ]/g, '').trim()
+  line = line.replace(/[^A-zÀ-ú ]/g, '').trim()
   const shipTypes = _.chain(ships).map(ship => [ship.type, ship.enType]).uniq().value()
   const shipTypeMap = Object.fromEntries(
     shipTypes
@@ -298,11 +315,11 @@ const parseShipAndType = (line, ships) => {
       .concat(shipTypes.map(([t, et]) => [t.slice(0, -2), et]))
   )
   const shipType = matchString(line, Object.keys(shipTypeMap))
-  console.log('SHIPPPP', shipType)
   if (!shipType) return [line, null]
 
-  const name = matchString(line, _.map(ships, 'name'))
-  return [_.find(ships, { name })?.enName, shipTypeMap[shipType]]
+  const enType = shipTypeMap[shipType]
+  const name = matchString(line, _.chain(ships).filter({ enType }).map('name').value())
+  return [_.find(ships, { name })?.enName, enType]
 }
 
 const getKillReport = async (guildId, hash, submittedBy, opts = {}) => {
@@ -471,7 +488,7 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
         }
 
         const shipIdx = stringIncludesIdx(lines, shipTypes.concat(shipTypes.map(t => t.slice(0, -1))).concat(shipTypes.map(t => t.slice(0, -2))))
-        console.log('SHIP IDX', shipIdx)
+        // console.log('SHIP IDX', shipIdx)
         if (shipIdx >= 0) {
           const [shipName, shipType] = parseShipAndType(lines[shipIdx], ships)
           killReport.shipType = shipType

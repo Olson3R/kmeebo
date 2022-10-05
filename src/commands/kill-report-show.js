@@ -18,7 +18,8 @@ const formatNumber = (text) => {
 
 const killReportShow = async (interaction) => {
   const guildId = interaction.guildId
-  const id = interaction.options.getString('id')
+  const id = interaction.options.getString('id')?.trim()
+  console.log('GGGGG', guildId, id)
 
   const killReport = await KillReport.findOne({ where: { id, guildId }, include: 'sourceImage' })
 
