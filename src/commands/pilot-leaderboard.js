@@ -26,15 +26,14 @@ const pilotLeaderboard = async (interaction) => {
   }
   const leaderboard = await KillReport.findAll({
     where,
-    group: ['finalBlowName', 'finalBlowCorp'],
+    group: ['finalBlowName'],
     attributes: [
-      'finalBlowName',
-      'finalBlowCorp',
+      ['finalBlowName', 'name'],
       [sequelize.fn('count', sequelize.col('*')), 'kills'],
       [sequelize.fn('sum', sequelize.col('isk')), 'isk']
     ],
     order: [['isk', 'desc']],
-    limit: 10,
+    limit: 20,
     raw: true
   })
 
@@ -42,7 +41,7 @@ const pilotLeaderboard = async (interaction) => {
     type: 'rich',
     color: colors.green,
     title: `${days ? `${days} Day` : 'Lifetime'} Pilot Leaderboard${killTag ? ` For Kill Tag ${killTag}` : ''}`,
-    description: _.map(leaderboard, (row, index) => `**${index + 1}. [${row.finalBlowCorp}] ${row.finalBlowName}** ${formatNumber(row.isk)} Isk (Kills: ${formatNumber(row.kills)})`).join('\n')
+    description: _.map(leaderboard, (row, index) => `**${index + 1}. ${row.name}** ${formatNumber(row.isk)} Isk (Kills: ${formatNumber(row.kills)})`).join('\n')
   }
 
   await interaction.reply({ embeds: [embed] })

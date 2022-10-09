@@ -33,7 +33,7 @@ const corporationLeaderboard = async (interaction) => {
       [sequelize.fn('sum', sequelize.col('isk')), 'isk']
     ],
     order: [['isk', 'desc']],
-    limit: 10,
+    limit: 20,
     raw: true
   })
   console.log('LLLL', leaderboard)

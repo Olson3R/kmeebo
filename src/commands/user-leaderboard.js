@@ -32,7 +32,7 @@ const userLeaderboard = async (interaction) => {
     (killTag ? ' AND KillReports.killTag = :killTag' : '') +
     ' GROUP BY Pilots.discordTag' +
     ' ORDER BY isk DESC' +
-    ' LIMIT 10',
+    ' LIMIT 20',
     {
       type: QueryTypes.SELECT,
       replacements: {

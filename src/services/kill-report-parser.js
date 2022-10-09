@@ -58,7 +58,7 @@ const RES = {
   },
   fr: {
     killReportId: /RAPPORT DE VICTIME [[(][I1][D0]:(?<value>[\d]+)[\])]/i,
-    lossReportId: /LOSS REPORT [[(][I1][D0]:(?<value>[\d]+)[\])]/i, // ???
+    lossReportId: /RAPPORT DE DÉFAITE [[(][I1][D0]:(?<value>[\d]+)[\])]/i, // ???
     participantCount: /Participants\s*\[\s*(?<value>[\d]+)\s*\]/i,
     finalBlow: /Coup de grâce\s*(?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Meilleurs dégâts\s*(?<damage>[\d]+) (?<percent>[\d]+)%/i,
@@ -96,14 +96,14 @@ const RES = {
     time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
   },
   zh: {
-    killReportId: /击毁报告 [[(][I1][D0]:(?<value>[\d]+)[\])]/i,
-    lossReportId: /损失报告 [[(][I1][D0]:(?<value>[\d]+)[\])]/i, // Guess
+    killReportId: /击毁报告\s*[[(][I1][D0]:(?<value>[\d]+)[\])]/i,
+    lossReportId: /损失报告\s*[[(][I1][D0]:(?<value>[\d]+)[\])]/i, // Guess
     participantCount: /参与者\s*\[\s*(?<value>[\d]+)\s*\]/i,
-    finalBlow: /最后一击 (?<damage>[\d]+) (?<percent>[\d]+)%/i,
-    topDamage: /Наибольший урон (?<damage>[\d]+) (?<percent>[\d]+)%/i,
-    warpScrambleStrength: /跃迁干扰强度: (?<value>-?\d+\.?\d?)/i,
-    totalDamage: /总伤害量: (?<value>[\d]+)/i,
-    isk: /(?<value>[\d,]+) ISK/i,
+    finalBlow: /最后一击\s*(?<damage>[\d]+) (?<percent>[\d]+)%/i,
+    topDamage: /造成伤害最多\s*(?<damage>[\d]+) (?<percent>[\d]+)%/i,
+    warpScrambleStrength: /跃迁干扰强度\s*:\s*(?<value>-?\d+\.?\d?)/i,
+    totalDamage: /总伤害量\s*:\s*(?<value>[\d]+)/i,
+    isk: /(?<value>\d+(\d,)+)/i,
     playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
     corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
     time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
@@ -142,17 +142,18 @@ const TEXT = {
     warpScrambleStrength: ['Мощность глушения']
   },
   zh: {
-    finalBlow: '最后一击',
-    topDamage: '???',
-    warpScrambleStrength: ['跃迁干扰强度']
+    finalBlow: '最 后 一 击',
+    topDamage: '总 伤 害 量',
+    warpScrambleStrength: ['跃 迁 干 扰 强 度']
   }
 }
 
-const matchString = (text, possibilities) => {
+const matchString = (text, possibilities, lang) => {
   const exactMatch = _.find(possibilities, p => text.includes(p))
   if (exactMatch) {
     return exactMatch
   }
+  if (lang === 'zh') return null
 
   const partialMatch = _.get(Finder.search(text, possibilities), '0.word')
   // logger.info('Partial match', { text, possibilities, partialMatch })
@@ -166,8 +167,8 @@ const matchString = (text, possibilities) => {
   // }
 }
 
-const stringIncludesIdx = (lines, possibilities) => {
-  return _.findIndex(lines, line => { return line && !_.isNil(matchString(line, possibilities)) })
+const stringIncludesIdx = (lines, possibilities, lang) => {
+  return _.findIndex(lines, line => { return line && !_.isNil(matchString(line, possibilities, lang)) })
 }
 
 const runRegExOnString = (text, re) => {
@@ -248,7 +249,7 @@ const closestVertIdx = (data, wx, wy, vertIdx, skipIndexes) => {
     }
   }
 
-  // console.log('CLOSE DIST', closeDist)
+  console.log('CLOSE DIST', closeDist)
   return closeIdx
 }
 
@@ -262,16 +263,16 @@ const findFinalBlow = (data, lang, ships) => {
   let closeIdx = closestVertIdx(data, wx, wy, 2, skips)
   const match = _.get(Finder.search(data[closeIdx].description, _.map(ships, 'name')), '0')
   if (match) {
-    // console.log('FINALL SHIPS NAME', data[closeIdx].description, match)
+    console.log('FINALL SHIPS NAME', data[closeIdx].description, match)
     skips.push(closeIdx)
     closeIdx = closestVertIdx(data, wx, wy, 2, skips)
   }
   if (RES[lang].participantCount.test(data[closeIdx].description)) {
-    // console.log('FINALL SKIP PARTICIPANT', data[closeIdx].description)
+    console.log('FINALL SKIP PARTICIPANT', data[closeIdx].description)
     skips.push(closeIdx)
     closeIdx = closestVertIdx(data, wx, wy, 2, skips)
   }
-  // console.log('FINALLL', finalBlowIdx, closeIdx, data[closeIdx].description)
+  console.log('FINALLL', finalBlowIdx, closeIdx, data[closeIdx].description)
 
   return parsePlayerAndCorp(data[closeIdx].description, lang)
 }
@@ -285,17 +286,17 @@ const findTopDamage = (data, lang, ships) => {
   let closeIdx = closestVertIdx(data, wx, wy, 2, [topIdx])
   const match = _.get(Finder.search(data[closeIdx].description, _.map(ships, 'name')), '0')
   if (match) {
-    // console.log('TOPP SHIPS NAME', data[closeIdx].description, match)
+    console.log('TOPP SHIPS NAME', data[closeIdx].description, match)
     closeIdx = closestVertIdx(data, wx, wy, 2, [topIdx, closeIdx])
   }
-  // console.log('TOPP', topIdx, closeIdx, data[closeIdx].description)
+  console.log('TOPP', topIdx, closeIdx, data[closeIdx].description)
 
   return parsePlayerAndCorp(data[closeIdx].description, lang)
 }
 
 const findVictim = (data, lang) => {
   const warpIdx = _.findIndex(data, d => Finder.search(d.description, TEXT[lang].warpScrambleStrength).length)
-  // console.log('WWWWARP', warpIdx)
+  console.log('WWWWARP', warpIdx)
   if (warpIdx < 0) return { corp: null, player: null }
 
   const warp = data[warpIdx]
@@ -306,19 +307,26 @@ const findVictim = (data, lang) => {
   return parsePlayerAndCorp(parts.join(' '), lang)
 }
 
-const parseShipAndType = (line, ships) => {
+const parseShipAndType = (line, ships, lang) => {
+  console.log('1')
   line = line.replace(/[^A-zÀ-ú ]/g, '').trim()
   const shipTypes = _.chain(ships).map(ship => [ship.type, ship.enType]).uniq().value()
+  console.log('2')
   const shipTypeMap = Object.fromEntries(
     shipTypes
       .concat(shipTypes.map(([t, et]) => [t.slice(0, -1), et]))
       .concat(shipTypes.map(([t, et]) => [t.slice(0, -2), et]))
   )
-  const shipType = matchString(line, Object.keys(shipTypeMap))
+  console.log('3')
+  const shipType = matchString(line, Object.keys(shipTypeMap), lang)
+  console.log('4')
   if (!shipType) return [line, null]
 
+  console.log('5')
   const enType = shipTypeMap[shipType]
-  const name = matchString(line, _.chain(ships).filter({ enType }).map('name').value())
+  console.log('6')
+  const name = matchString(line, _.chain(ships).filter({ enType }).map('name').value(), lang)
+  console.log('7')
   return [_.find(ships, { name })?.enName, enType]
 }
 
@@ -425,10 +433,11 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
       killReport.statusMessage = 'Cannot determine language'
     } else {
       const combined = combineBoxes(data)
-      // console.log('COMBINEEE', data.length, combined.length, combined)
+      console.log('COMBINEEE', data.length, combined.length, combined)
       killReport.lang = lang
       killReport.type = type
 
+      console.log('KILL REPORT')
       if (killReportIdIdx < 0) {
         killReport.status = 'ERROR'
         killReport.statusMessage = 'Cannot find kill report id'
@@ -459,27 +468,32 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
           return duplicateKillReport
         }
 
+        console.log('SHIPS???')
         const ships = require(`../../config/ships.${lang}.json`)
         const shipTypes = _.chain(ships).map('type').uniq().value()
 
+        console.log('PARTICIPANT COUNT')
         const participantCountIdx = regExIdx(lines, RES[lang].participantCount)
         if (participantCountIdx >= 0) {
           killReport.participantCount = parseInt(_.get(runRegExOnString(lines[participantCountIdx], RES[lang].participantCount), 'value'))
           lines[participantCountIdx] = null
         }
 
+        console.log('WARP SCRAM STRENGTH')
         const warpScrambleStrengthIdx = regExIdx(lines, RES[lang].warpScrambleStrength)
         if (warpScrambleStrengthIdx >= 0) {
           killReport.warpScrambleStrength = parseFloat(_.get(runRegExOnString(lines[warpScrambleStrengthIdx], RES[lang].warpScrambleStrength), 'value'))
           lines[warpScrambleStrengthIdx] = null
         }
 
+        console.log('TOTAL DAMAGE')
         const totalDamageIdx = regExIdx(lines, RES[lang].totalDamage)
         if (totalDamageIdx >= 0) {
           killReport.totalDamage = parseInt(_.get(runRegExOnString(lines[totalDamageIdx], RES[lang].totalDamage), 'value'))
           lines[totalDamageIdx] = null
         }
 
+        console.log('ISK')
         const iskIdx = regExIdx(lines, RES[lang].isk)
         if (iskIdx >= 0) {
           const v = runRegExOnString(lines[iskIdx], RES[lang].isk)
@@ -487,15 +501,17 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
           lines[iskIdx] = null
         }
 
-        const shipIdx = stringIncludesIdx(lines, shipTypes.concat(shipTypes.map(t => t.slice(0, -1))).concat(shipTypes.map(t => t.slice(0, -2))))
-        // console.log('SHIP IDX', shipIdx)
+        console.log('SHIP')
+        const shipIdx = stringIncludesIdx(lines, lang === 'zh' ? shipTypes : shipTypes.concat(shipTypes.map(t => t.slice(0, -1))).concat(shipTypes.map(t => t.slice(0, -2))), lang)
+        console.log('SHIP IDX', shipIdx)
         if (shipIdx >= 0) {
-          const [shipName, shipType] = parseShipAndType(lines[shipIdx], ships)
+          const [shipName, shipType] = parseShipAndType(lines[shipIdx], ships, lang)
           killReport.shipType = shipType
           killReport.shipName = shipName
           lines[shipIdx] = null
         }
 
+        console.log('TIME')
         const timeIdx = regExIdx(lines, RES[lang].time)
         if (timeIdx >= 0) {
           const tRaw = _.get(runRegExOnString(lines[timeIdx], RES[lang].time), 'value').replace(/UTC\s*/, '')
@@ -503,6 +519,7 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
           lines[timeIdx] = null
         }
 
+        console.log('LOCATION')
         const locationLines = _.filter(lines, line => line && line.match(/</))
         const locationLineIdx = stringIncludesIdx(_.map(locationLines, l => _.trim(_.last(_.split(l, '<')))), REGIONS)
         if (locationLineIdx >= 0) {
@@ -511,7 +528,7 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
             let location = lines[locationIdx]
             lines[locationIdx] = null
             killReport.location = location
-            killReport.region = matchString(_.trim(_.last(_.split(location, '<'))), REGIONS)
+            killReport.region = matchString(_.trim(_.last(_.split(location, '<'))), REGIONS, lang)
             if (killReport.region) {
               location = location.trim().slice(0, -killReport.region.length).replace(/\s*<\s*\w{0,2}\s*$/, '')
               const constellations = _.chain(Systems)
@@ -519,18 +536,18 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
                 .map('constellation')
                 .uniq()
                 .value()
-              killReport.constellation = matchString(_.trim(_.last(_.split(location, '<'))), constellations)
+              killReport.constellation = matchString(_.trim(_.last(_.split(location, '<'))), constellations, lang)
               if (killReport.constellation) {
                 location = location.replace(killReport.constellation, '').replace(/\s*<\s*\w{0,2}\s*$/, '')
                 const systemNames = _.chain(Systems)
                   .filter({ region: killReport.region, constellation: killReport.constellation })
                   .map('name')
                   .value()
-                killReport.system = matchString(location, systemNames)
+                killReport.system = matchString(location, systemNames, lang)
                 if (!killReport.system) {
                   const systemIdx = stringIncludesIdx(lines, systemNames)
                   if (systemIdx >= 0) {
-                    killReport.system = matchString(lines[systemIdx], systemNames)
+                    killReport.system = matchString(lines[systemIdx], systemNames, lang)
                     lines[systemIdx] = null
                   }
                 }
@@ -539,14 +556,17 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
           }
         }
 
+        console.log('FINAL BLOW')
         const { corp: finalBlowCorp, player: finalBlowName } = findFinalBlow(combined, lang, ships)
         killReport.finalBlowCorp = finalBlowCorp
         killReport.finalBlowName = finalBlowName
 
+        console.log('TOP DAMAGE')
         const { corp: topDamageCorp, player: topDamageName } = findTopDamage(combined, lang, ships)
         killReport.topDamageCorp = topDamageCorp
         killReport.topDamageName = topDamageName
 
+        console.log('VICTIM')
         const { corp: victimCorp, player: victimName } = findVictim(combined, lang)
         if (killReport.shipType === 'Corporation Citadel') {
           killReport.victimCorp = victimName
