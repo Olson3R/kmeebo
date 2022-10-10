@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     hash: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     url: {
       type: DataTypes.STRING,
@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   SourceImage.associate = ({ KillReport }) => {
-    SourceImage.hasMany(KillReport)
+    SourceImage.hasMany(KillReport, { as: 'killReports' })
   }
 
   return SourceImage

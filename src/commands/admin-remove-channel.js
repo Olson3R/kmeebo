@@ -4,8 +4,7 @@ const { Channel } = require('../models')
 
 const adminRemoveChannel = async (interaction) => {
   const guildId = interaction.guildId
-  const interactionUserTag = interaction.user.tag
-  if (!(await isAdmin(guildId, interactionUserTag))) {
+  if (!(await isAdmin(guildId, interaction.member))) {
     const embed = {
       color: colors.red,
       title: 'Not An Admin',

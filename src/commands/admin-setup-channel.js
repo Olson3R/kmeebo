@@ -4,13 +4,12 @@ const _ = require('lodash')
 const colors = require('../color-util')
 const { isAdmin } = require('../util')
 const { Channel } = require('../models')
-const logger = require('../services/logger')
 
 const adminSetupChannel = async (interaction) => {
   const updatedBy = interaction.user.tag
   const guildId = interaction.guildId
 
-  if (!(await isAdmin(guildId, updatedBy))) {
+  if (!(await isAdmin(guildId, interaction.member))) {
     const embed = {
       color: colors.red,
       title: 'Not An Admin',

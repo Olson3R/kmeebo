@@ -7,7 +7,7 @@ const { User } = require('../models')
 const adminAddAdmin = async (interaction) => {
   const guildId = interaction.guildId
   const updatedBy = interaction.user.tag
-  if (!(await isAdmin(guildId, updatedBy))) {
+  if (!(await isAdmin(guildId, interaction.member))) {
     const embed = {
       color: colors.red,
       title: 'Not An Admin',

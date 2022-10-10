@@ -9,7 +9,7 @@ const adminRemoveCorpForwarding = async (interaction, client) => {
   const updatedBy = interaction.user.tag
   const guildId = interaction.guildId
 
-  if (!(await isAdmin(guildId, updatedBy))) {
+  if (!(await isAdmin(guildId, interaction.member))) {
     const embed = {
       color: colors.red,
       title: 'Not An Admin',
