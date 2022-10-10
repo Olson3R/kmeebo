@@ -10,6 +10,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
+    channelId: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     messageId: {
       type: DataTypes.STRING,
       allowNull: false
@@ -34,6 +38,7 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: true,
     indexes: [
       { fields: ['guildId'] },
+      { fields: ['channelId'] },
       { fields: ['messageId'] },
       { fields: ['status'] }
     ]

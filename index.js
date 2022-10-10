@@ -19,6 +19,7 @@ const pilotStats = require('./src/commands/pilot-stats')
 const userLeaderboard = require('./src/commands/user-leaderboard')
 
 const { killReportHandler } = require('./src/handlers/kill-report-handler')
+const { backfillKillReportsHandler } = require('./src/handlers/backfill-kill-reports-handler')
 const logger = require('./src/services/logger')
 
 // Create a new client instance
@@ -33,6 +34,7 @@ const client = new Client({
 // When the client is ready, run this code (only once)
 client.once('ready', () => {
   console.log('Ready!')
+  setImmediate(() => { backfillKillReportsHandler(client) })
 })
 
 client.on('interactionCreate', async interaction => {

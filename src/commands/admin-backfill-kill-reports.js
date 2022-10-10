@@ -55,14 +55,20 @@ const adminBackfillKillReports = async (interaction, client) => {
 
         // console.log(`Processing message ${message.id}`)
         const guildId = message.guildId
+        const channelId = message.channelId
         const createdBy = message.author.tag
-        const backfillMessage = await BackfillMessage.create({
-          guildId,
-          messageId,
-          imageUrls: images.join('\n'),
-          imageCount: images.length,
-          status: 'PENDING',
-          createdBy
+        const backfillMessage = await BackfillMessage.findOrCreate({
+          where: {
+            guildId,
+            channelId,
+            messageId
+          },
+          defaults: {
+            imageUrls: images.join('\n'),
+            imageCount: images.length,
+            status: 'PENDING',
+            createdBy
+          }
         })
       }
       messages = await channel.messages.fetch({ before: messageId, limit: 100 })
