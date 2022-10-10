@@ -35,7 +35,9 @@ const adminBackfillKillReports = async (interaction, client) => {
 
     let messageId = null
     let messages = await channel.messages.fetch({ limit: 100 })
+    let pageCount = 0
     while (messages.size > 0) {
+      pageCount++
       // console.log(`Received ${messages.size} messages`)
       for (const message of messages.values()) {
         messageId = message.id
@@ -73,6 +75,7 @@ const adminBackfillKillReports = async (interaction, client) => {
       }
       messages = await channel.messages.fetch({ before: messageId, limit: 100 })
     }
+    logger.info(`Done checking ${pageCount} pages for backfilling ${channel.name}`)
   } catch (e) {
     logger.error(e.message)
 
