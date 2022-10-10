@@ -399,7 +399,7 @@ const getResult = async (killReport, imageData, ext) => {
   const client = new vision.ImageAnnotatorClient({ credentials: GoogleAuth })
   const [result] = await client.textDetection(imageFile)
   // await fsp.writeFile(googleVisionFile, JSON.stringify(result))
-  sourceImage.annotations = result
+  sourceImage.annotations = JSON.stringify(result)
   await sourceImage.save()
   return result
 }
