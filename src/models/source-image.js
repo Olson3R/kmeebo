@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true
     },
     annotations: {
-      type: DataTypes.TEXT,
+      type: DataTypes.TEXT('medium'),
       allowNull: true
     },
   }, {
