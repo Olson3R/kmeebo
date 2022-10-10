@@ -354,6 +354,7 @@ const getKillReport = async (guildId, hash, submittedBy, opts = {}) => {
       id: opts.id,
       killTag: opts.killTag,
       submittedBy,
+      messageId: opts.messageId,
       status: 'PROCESSING'
     }
   })
@@ -382,15 +383,25 @@ const getResult = async (killReport, imageData, ext) => {
   }
 
   // Process with Google Vision API
+  const sourceImage = killReport.sourceImage
+  if (sourceImage.annotations) {
+    return JSON.parse(sourceImage.annotations)
+  }
+
   const googleVisionFile = `${KM_DIR}/${killReport.sourceImageId}.gv.json`
   if (fs.existsSync(googleVisionFile)) {
-    return JSON.parse(await fsp.readFile(googleVisionFile))
-  } else {
-    const client = new vision.ImageAnnotatorClient({ credentials: GoogleAuth })
-    const [result] = await client.textDetection(imageFile)
-    await fsp.writeFile(googleVisionFile, JSON.stringify(result))
-    return result
+    const annotations = await fsp.readFile(googleVisionFile)
+    sourceImage.annotations = annotations
+    await sourceImage.save()
+    return JSON.parse(annotations)
   }
+
+  const client = new vision.ImageAnnotatorClient({ credentials: GoogleAuth })
+  const [result] = await client.textDetection(imageFile)
+  // await fsp.writeFile(googleVisionFile, JSON.stringify(result))
+  sourceImage.annotations = result
+  await sourceImage.save()
+  return result
 }
 
 const parseKillReport = async (guildId, submittedBy, filename, imageData, opts = {}) => {

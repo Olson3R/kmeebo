@@ -13,7 +13,11 @@ module.exports = (sequelize, DataTypes) => {
     url: {
       type: DataTypes.STRING,
       allowNull: true
-    }
+    },
+    annotations: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
   }, {
     timestamps: true,
     indexes: [

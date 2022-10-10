@@ -12,6 +12,9 @@ const commands = [
       .addStringOption(option => option.setName('corp-guild-id').setDescription('The id of the corporation\'s guild to allow messages from.').setRequired(true))
       .addChannelOption(option => option.setName('forwardable-channel').setDescription('The channel to allow messages to be forwarded to.').setRequired(true))
     )
+
+    .addSubcommand(subcommand => subcommand.setName('backfill-kill-reports').setDescription('Read channel message history to find past kill reports.'))
+
     .addSubcommand(subcommand => subcommand.setName('remove-corp-forwarding').setDescription('Remove a corporation\'s guild permission to post messages to a channel.')
       .addStringOption(option => option.setName('corp-guild-id').setDescription('The id of the corporation\'s guild to allow messages from.').setRequired(true))
       .addChannelOption(option => option.setName('forwardable-channel').setDescription('The channel to allow messages to be forwarded to.').setRequired(false))
@@ -20,6 +23,7 @@ const commands = [
       .addUserOption(option => option.setName('user').setDescription('The user to remove admin permissions from.').setRequired(true))
     )
     .addSubcommand(subcommand => subcommand.setName('kill-report-forwarding').setDescription('Configure kill report forwarding to an external channel.'))
+
     .addSubcommand(subcommand => subcommand.setName('setup-channel').setDescription('Setup up a channel for tracking kill reports.')
       .addStringOption(option => option.setName('kill-tag').setDescription('An optional tag to associate all kills with.'))
     )
@@ -62,7 +66,7 @@ const commands = [
       .addIntegerOption(option => option.setName('days').setDescription('The number of days in the past to include kill reports from.'))
       .addStringOption(option => option.setName('kill-tag').setDescription('The kill tag to limit kill reports to.'))
     )
-    .addSubcommand(subcommand => subcommand.setName('stats').setDescription('Show kill and loss stats for a user\'s pilots.'))
+    // .addSubcommand(subcommand => subcommand.setName('stats').setDescription('Show kill and loss stats for a user\'s pilots.'))
 ]
   .map(command => command.toJSON())
 

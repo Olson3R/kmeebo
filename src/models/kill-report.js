@@ -98,6 +98,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false
     },
+    messageId: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     status: {
       type: DataTypes.STRING,
       allowNull: false
@@ -130,7 +134,8 @@ module.exports = (sequelize, DataTypes) => {
       { fields: ['system'] },
       { fields: ['submittedBy'] },
       { fields: ['status'] },
-      { fields: ['sourceImageId'] }
+      { fields: ['sourceImageId'] },
+      { fields: ['messageId'] }
     ]
   })
 
