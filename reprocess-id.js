@@ -33,9 +33,10 @@ const run = async () => {
       imageData = await fsp.readFile(imageFile)
     } catch(e) {
       logger.info(`Downloading missing file: ${imageFile}`)
+      const ext = path.extname(killReport.sourceImage)
       const sourceImage = killReport.sourceImage
-      imageFile = sourceImage.url
-      const response = await axios.get(imageFile, { responseType: 'arraybuffer' })
+      const response = await axios.get(sourceImage.url, { responseType: 'arraybuffer' })
+      imageFile = `${sourceImage.id}${ext}`
       imageData = Buffer.from(response.data, 'binary')
     }
 

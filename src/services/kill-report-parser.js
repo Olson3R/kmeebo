@@ -396,7 +396,6 @@ const getResult = async (killReport, imageData, ext) => {
 
 const parseKillReport = async (guildId, submittedBy, filename, imageData, opts = {}) => {
   const hash = crypto.createHash('sha256').update(imageData).digest('base64')
-  // logger.info(`HASHHH`, { hash, filename })
   const ext = path.extname(filename)
   const sourceImageId = opts.reprocess && path.basename(filename, ext)
 
