@@ -39,8 +39,8 @@ const run = async () => {
       imageData = Buffer.from(response.data, 'binary')
     }
 
-    logger.info(`Processing ${KILL_REPORT_ID}`)
-    await parseKillReport(killReport.guildId, SUBMITTED_BY, imageFile, imageData, { reprocess: true })
+    const reprocessed = await parseKillReport(killReport.guildId, SUBMITTED_BY, imageFile, imageData, { reprocess: true })
+    logger.info(`Processing ${reprocessed.id}`)
 
     logger.info('Done reprocessing')
   } catch (e) {
