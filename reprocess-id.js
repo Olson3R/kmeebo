@@ -30,13 +30,13 @@ const run = async () => {
     try {
       await fsp.access(imageFile, fsp.constants.F_OK)
     } catch(e) {
-      logger.info(`File missing: ${imageFile}`)
+      logger.info(`Downloading missing file: ${imageFile}`)
       const sourceImage = killReport.sourceImage
       const response = await axios.get(sourceImage.url, { responseType: 'arraybuffer' })
       imageFile = Buffer.from(response.data, 'binary')
     }
 
-    logger.info(`Processing file ${file}`)
+    logger.info(`Processing ${KILL_REPORT_ID}`)
     const imageData = fs.readFileSync(imageFile)
     await parseKillReport(killReport.guildId, SUBMITTED_BY, imageFile, imageData, { reprocess: true })
 
