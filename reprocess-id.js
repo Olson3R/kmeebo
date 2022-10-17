@@ -4,6 +4,7 @@ const path = require('path')
 const _ = require('lodash')
 
 const logger = require('./src/services/logger')
+const { KillReport } = require('./src/models')
 const parseKillReport = require('./src/services/kill-report-parser')
 
 const KM_DIR = './kill-reports'
