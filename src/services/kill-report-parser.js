@@ -351,7 +351,6 @@ const getKillReport = async (guildId, hash, submittedBy, opts = {}) => {
   const [killReport, created] = await KillReport.findOrCreate({
     where: { guildId, sourceImageId: sourceImage.id },
     defaults: {
-      id: opts.id,
       killTag: opts.killTag,
       submittedBy,
       messageId: opts.messageId,
@@ -383,24 +382,15 @@ const getResult = async (killReport, imageData, ext) => {
   }
 
   // Process with Google Vision API
-  const sourceImage = killReport.sourceImage
-  if (sourceImage.annotations) {
-    return JSON.parse(sourceImage.annotations)
-  }
-
   const googleVisionFile = `${KM_DIR}/${killReport.sourceImageId}.gv.json`
   if (fs.existsSync(googleVisionFile)) {
     const annotations = await fsp.readFile(googleVisionFile)
-    sourceImage.annotations = annotations
-    await sourceImage.save()
     return JSON.parse(annotations)
   }
 
   const client = new vision.ImageAnnotatorClient({ credentials: GoogleAuth })
   const [result] = await client.textDetection(imageFile)
-  // await fsp.writeFile(googleVisionFile, JSON.stringify(result))
-  sourceImage.annotations = JSON.stringify(result)
-  await sourceImage.save()
+  await fsp.writeFile(googleVisionFile, JSON.stringify(result))
   return result
 }
 

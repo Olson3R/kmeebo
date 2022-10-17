@@ -76,15 +76,15 @@ const adminBackfillKillReports = async (interaction, client) => {
       messages = await channel.messages.fetch({ before: messageId, limit: 100 })
     }
     logger.info(`Done checking ${pageCount} pages for backfilling ${channel.name}`)
-  } catch (e) {
-    logger.error(e.message)
 
     // const embed = {
-    //   color: colors.red,
+    //   color: colors.green,
     //   title: 'Error Configuring Corp Forwarding',
     //   description: e.message
     // }
-    // await interaction.reply({ embeds: [embed], components: [], content: null })
+    // await interaction.channel.({ embeds: [embed], components: [], content: null })
+  } catch (e) {
+    logger.error(e.message)
   }
 }
 
