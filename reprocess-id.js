@@ -8,7 +8,7 @@ const parseKillReport = require('./src/services/kill-report-parser')
 
 const KM_DIR = './kill-reports'
 const KILL_REPORT_ID = process.argv[2]
-if (!GUILD_ID) {
+if (!KILL_REPORT_ID) {
   console.error('Missing kill report id argument')
   process.exit(1)
 }
@@ -22,7 +22,7 @@ const run = async () => {
     })
     let imageFile = _.find(fs.readdirSync(KM_DIR), file => {
       const ext = path.extname(file)
-      return ext &&  !['.csv', '.json'].includes(ext)
+      return ext && !['.csv', '.json'].includes(ext)
     })
 
     try {
@@ -34,7 +34,7 @@ const run = async () => {
 
     logger.info(`Processing file ${file}`)
     const imageData = fs.readFileSync(imageFile)
-    await parseKillReport(GUILD_ID, SUBMITTED_BY, imageFile, imageData, { reprocess: true })
+    await parseKillReport(killReport.guildId, SUBMITTED_BY, imageFile, imageData, { reprocess: true })
 
     logger.info('Done reprocessing')
   } catch (e) {
