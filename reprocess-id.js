@@ -1,3 +1,4 @@
+const axios = require('axios')
 const fs = require('fs')
 const fsp = require('fs/promises')
 const path = require('path')
@@ -30,7 +31,9 @@ const run = async () => {
       await fsp.access(imageFile, fsp.constants.F_OK)
     } catch(e) {
       logger.info(`File missing: ${imageFile}`)
-      return
+      const sourceImage = killReport.sourceImage
+      const response = await axios.get(sourceImage.url, { responseType: 'arraybuffer' })
+      imageFile = Buffer.from(response.data, 'binary')
     }
 
     logger.info(`Processing file ${file}`)
