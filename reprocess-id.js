@@ -29,7 +29,7 @@ const run = async () => {
       await fsp.access(imageFile, fsp.constants.F_OK)
     } catch(e) {
       logger.info(`File missing: ${imageFile}`)
-      continue
+      return
     }
 
     logger.info(`Processing file ${file}`)
@@ -41,4 +41,5 @@ const run = async () => {
     logger.error('Failed to reprocess kill report', { errors: e.errors, error: e.message, stackTrace: e.stack })
   }
 }
+
 run()
