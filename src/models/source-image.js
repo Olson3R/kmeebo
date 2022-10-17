@@ -14,10 +14,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true
     },
-    annotations: {
-      type: DataTypes.TEXT('medium'),
-      allowNull: true
-    },
   }, {
     timestamps: true,
     indexes: [
