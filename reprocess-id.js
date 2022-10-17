@@ -27,17 +27,19 @@ const run = async () => {
       return ext && !['.csv', '.json'].includes(ext)
     })
 
+    let imageData = null
     try {
       await fsp.access(imageFile, fsp.constants.F_OK)
+      imageData = await fsp.readFile(imageFile)
     } catch(e) {
       logger.info(`Downloading missing file: ${imageFile}`)
       const sourceImage = killReport.sourceImage
-      const response = await axios.get(sourceImage.url, { responseType: 'arraybuffer' })
-      imageFile = Buffer.from(response.data, 'binary')
+      imageFile = sourceImage.url
+      const response = await axios.get(imageFile, { responseType: 'arraybuffer' })
+      imageData = Buffer.from(response.data, 'binary')
     }
 
     logger.info(`Processing ${KILL_REPORT_ID}`)
-    const imageData = fs.readFileSync(imageFile)
     await parseKillReport(killReport.guildId, SUBMITTED_BY, imageFile, imageData, { reprocess: true })
 
     logger.info('Done reprocessing')
