@@ -4,7 +4,7 @@ const colors = require('../color-util')
 const { KillReport } = require('../models')
 
 const killReportExport = async (interaction) => {
-  // interaction.deferReply()
+  interaction.deferReply()
 
   const guildId = interaction.guildId
   const killTag = interaction.options.getString('kill-tag')
@@ -50,14 +50,14 @@ const killReportExport = async (interaction) => {
       color: colors.green,
       title: `Exported ${killReports.length} kill reports`
     }
-    await interaction.reply({ embeds: [embed], files: [{ attachment: csv, name: 'kill-report-export.csv' }] })
+    await interaction.editReply({ embeds: [embed], files: [{ attachment: csv, name: 'kill-report-export.csv' }] })
     // await interaction.reply({ embeds: [embed], attachments: [new AttachmentBuilder(csv, { name: 'kmeebo-export.csv'})] })
   } else {
     const embed = {
       color: colors.red,
       title: 'Could not find any kill reports'
     }
-    await interaction.reply({ embeds: [embed], ephemeral: true })
+    await interaction.editReply({ embeds: [embed], ephemeral: true })
   }
 }
 
