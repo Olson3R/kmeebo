@@ -14,7 +14,7 @@ const formatNumber = (text) => {
 
 const corporationLeaderboard = async (interaction) => {
   const guildId = interaction.guildId
-  const period = interaction.options.getString('period') ?? 'month'
+  const period = interaction.options.getString('period') ?? 'current-month'
   const killTag = interaction.options.getString('kill-tag')
 
   let periodName = 'Lifetime'
