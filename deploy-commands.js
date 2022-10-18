@@ -36,6 +36,7 @@ const commands = [
       .addStringOption(option => option.setName('period').setDescription('The timeframe for the leaderbaord report.')
         .addChoices({ name: 'Curent Month', value: 'current-month' })
         .addChoices({ name: 'Last Month', value: 'last-month' })
+        .addChoices({ name: 'Lifetime', value: 'lifetime' })
       )
       .addStringOption(option => option.setName('kill-tag').setDescription('The kill tag to limit kill reports to.'))
     )
