@@ -14,15 +14,24 @@ const formatNumber = (text) => {
 
 const corporationLeaderboard = async (interaction) => {
   const guildId = interaction.guildId
-  const days = interaction.options.getInteger('days')
+  const period = interaction.options.getString('period') ?? 'month'
   const killTag = interaction.options.getString('kill-tag')
 
+  let periodName = 'Lifetime'
   const where = { guildId, finalBlowCorp: { [Op.ne]: null }, status: 'SUCCESS' }
   if (killTag) {
     where.killTag = killTag
   }
-  if (days > 0) {
-    where.killedAt = { [Op.gt]: DateTime.now().minus({ days }).toJSDate() }
+  if (period === 'current-month') {
+    where.killedAt = { [Op.gt]: DateTime.now().startOf('month').toJSDate() }
+    periodName = 'Current Month\'s'
+  }
+  else if (period === 'last-month') {
+    where[Op.and] = [
+      { killedAt: { [Op.gt]: DateTime.now().startOf('month').minus({ month: 1 }).toJSDate() }},
+      { killedAt: { [Op.lt]: DateTime.now().startOf('month').toJSDate() }},
+    ]
+    periodName = 'Last Month\'s'
   }
   const leaderboard = await KillReport.findAll({
     where,
@@ -36,11 +45,10 @@ const corporationLeaderboard = async (interaction) => {
     limit: 20,
     raw: true
   })
-  console.log('LLLL', leaderboard)
   const embed = {
     type: 'rich',
     color: colors.green,
-    title: `${days ? `${days} Day` : 'Lifetime'} Corporation Leaderboard${killTag ? ` For Kill Tag ${killTag}` : ''}`,
+    title: `${periodName} Corporation Leaderboard${killTag ? ` For Kill Tag ${killTag}` : ''}`,
     description: _.map(leaderboard, (row, index) => `**${index + 1}. ${row.finalBlowCorp}** ${formatNumber(row.isk)} Isk (Kills: ${formatNumber(row.kills)})`).join('\n')
   }
 
