@@ -12,13 +12,13 @@ const formatNumber = (text) => {
   return Math.round(text).toLocaleString()
 }
 
-const corporationLeaderboard = async (interaction) => {
+const killReportStats = async (interaction) => {
   const guildId = interaction.guildId
   const period = interaction.options.getString('period') ?? 'current-month'
   const killTag = interaction.options.getString('kill-tag')
 
   let periodName = 'Lifetime'
-  const where = { guildId, finalBlowCorp: { [Op.ne]: null }, status: 'SUCCESS' }
+  const where = { guildId, type: 'kill', status: 'SUCCESS' }
   if (killTag) {
     where.killTag = killTag
   }
@@ -36,26 +36,28 @@ const corporationLeaderboard = async (interaction) => {
     ]
     periodName = 'Last Month\'s'
   }
-  const leaderboard = await KillReport.findAll({
+  const stats = await KillReport.findAll({
     where,
-    group: ['finalBlowCorp'],
+    group: ['shipType'],
     attributes: [
-      'finalBlowCorp',
+      'shipType',
       [sequelize.fn('count', sequelize.col('*')), 'kills'],
       [sequelize.fn('sum', sequelize.col('isk')), 'isk']
     ],
     order: [['isk', 'desc']],
-    limit: 20,
     raw: true
   })
+
+  const grandTotals = `**Grand Total** (Kills: ${formatNumber(_.sumBy(stats, 'kills'))})`
+  const results = _.map(stats, (row, index) => `**${row.shipType ?? 'Unknown'}** ${formatNumber(row.isk)} Isk (Kills: ${formatNumber(row.kills)})`)
   const embed = {
     type: 'rich',
     color: colors.green,
-    title: `${periodName} Corporation Leaderboard${killTag ? ` For Kill Tag ${killTag}` : ''}`,
-    description: _.map(leaderboard, (row, index) => `**${index + 1}. ${row.finalBlowCorp}** ${formatNumber(row.isk)} Isk (Kills: ${formatNumber(row.kills)})`).join('\n')
+    title: `${periodName} Kill Report Stats${killTag ? ` For Kill Tag ${killTag}` : ''}`,
+    description: `${grandTotals}\n\n${results.join('\n')}`
   }
 
   await interaction.reply({ embeds: [embed] })
 }
 
-module.exports = corporationLeaderboard
+module.exports = killReportStats

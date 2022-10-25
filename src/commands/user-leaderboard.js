@@ -57,7 +57,7 @@ const userLeaderboard = async (interaction) => {
   )
 
   const results = _.map(leaderboard, (row, index) => {
-    const user = interaction.guild.members.cache.find(m => m.user.tag === row.discordTag)
+    const user = interaction.guild.members.cache.get(m => m.user.tag === row.discordTag)
     return `**${index + 1}. ${user ?? row.discordTag}** ${formatNumber(row.isk)} Isk (Kills: ${formatNumber(row.kills)})`
   })
   const embed = {

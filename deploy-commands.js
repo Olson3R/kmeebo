@@ -48,6 +48,12 @@ const commands = [
     .addSubcommand(subcommand => subcommand.setName('export').setDescription('Export all kill reports to a CSV file.'))
     .addSubcommand(subcommand => subcommand.setName('show').setDescription('Show information for a kill report by id.')
       .addStringOption(option => option.setName('id').setDescription('The Kmeebo defined id for the kill report.').setRequired(true))
+    ).addSubcommand(subcommand => subcommand.setName('stats').setDescription('Statistics for kill reports.')
+      .addStringOption(option => option.setName('period').setDescription('The timeframe for included kill reports.')
+        .addChoices({ name: 'Curent Month', value: 'current-month' })
+        .addChoices({ name: 'Last Month', value: 'last-month' })
+        .addChoices({ name: 'Lifetime', value: 'lifetime' })
+      )
     ),
 
   new SlashCommandBuilder().setName('pilot').setDescription('Commands related to pilots.')

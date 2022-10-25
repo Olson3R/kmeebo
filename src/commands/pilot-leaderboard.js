@@ -23,7 +23,10 @@ const pilotLeaderboard = async (interaction) => {
     where.killTag = killTag
   }
   if (period === 'current-month') {
-    where.killedAt = { [Op.gt]: DateTime.now().startOf('month').toJSDate() }
+    where[Op.and] = [
+      { killedAt: { [Op.gt]: DateTime.now().startOf('month').toJSDate() }},
+      { killedAt: { [Op.lt]: DateTime.now().startOf('month').plus({ month: 1 }).toJSDate() }},
+    ]
     periodName = 'Current Month\'s'
   }
   else if (period === 'last-month') {

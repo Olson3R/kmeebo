@@ -13,6 +13,7 @@ const corporationLeaderboard = require('./src/commands/corporation-leaderboard')
 const corporationStats = require('./src/commands/corporation-stats')
 const killReportExport = require('./src/commands/kill-report-export')
 const killReportShow = require('./src/commands/kill-report-show')
+const killReportStats = require('./src/commands/kill-report-stats')
 const pilotLeaderboard = require('./src/commands/pilot-leaderboard')
 const pilotRegister = require('./src/commands/pilot-register')
 const pilotStats = require('./src/commands/pilot-stats')
@@ -62,7 +63,8 @@ client.on('interactionCreate', async interaction => {
       },
       'kill-report': {
         export: killReportExport,
-        show: killReportShow
+        show: killReportShow,
+        stats: killReportStats
       },
       pilot: {
         leaderboard: pilotLeaderboard,
