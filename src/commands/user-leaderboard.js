@@ -56,12 +56,15 @@ const userLeaderboard = async (interaction) => {
     }
   )
 
-  const results = _.map(leaderboard, (row, index) => `**${index + 1}. ${row.discordTag}** ${formatNumber(row.isk)} Isk (Kills: ${formatNumber(row.kills)})`).join('\n')
+  const results = _.map(leaderboard, (row, index) => {
+    const user = interaction.guild.members.cache.find(m => m.user.tag === row.discordTag)
+    return `**${index + 1}. ${user ?? row.discordTag}** ${formatNumber(row.isk)} Isk (Kills: ${formatNumber(row.kills)})`
+  })
   const embed = {
     type: 'rich',
     color: colors.green,
     title: `${periodName} User Leaderboard${killTag ? ` For Kill Tag ${killTag}` : ''}`,
-    description: `Scored based on ${scoringData.text}\n\n${results}`
+    description: `Scored based on ${scoringData.text}\n\n${results.join('\n')}`
   }
 
   await interaction.reply({ embeds: [embed] })
