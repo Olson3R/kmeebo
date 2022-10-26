@@ -48,7 +48,8 @@ const killReportStats = async (interaction) => {
     raw: true
   })
 
-  const grandTotals = `**Grand Total** (Kills: ${formatNumber(_.sumBy(stats, 'kills'))})`
+  const totalIsk = _.chain(stats).map('isk').map(v => parseInt(v, 10)).sum().value()
+  const grandTotals = `**Grand Total** ${formatNumber(totalIsk)} Isk (Kills: ${formatNumber(_.sumBy(stats, 'kills'))})`
   const results = _.map(stats, (row, index) => `**${row.shipType ?? 'Unknown'}** ${formatNumber(row.isk)} Isk (Kills: ${formatNumber(row.kills)})`)
   const embed = {
     type: 'rich',
