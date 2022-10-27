@@ -11,6 +11,7 @@ const adminRemoveChannel = require('./src/commands/admin-remove-channel')
 const adminSetupChannel = require('./src/commands/admin-setup-channel')
 const corporationLeaderboard = require('./src/commands/corporation-leaderboard')
 const corporationStats = require('./src/commands/corporation-stats')
+const getDiscordGuildId = require('./src/commands/discord-get-guild-id')
 const killReportExport = require('./src/commands/kill-report-export')
 const killReportShow = require('./src/commands/kill-report-show')
 const killReportStats = require('./src/commands/kill-report-stats')
@@ -60,6 +61,9 @@ client.on('interactionCreate', async interaction => {
       corporation: {
         leaderboard: corporationLeaderboard,
         stats: corporationStats
+      },
+      discord: {
+        'get-guild-id': getDiscordGuildId
       },
       'kill-report': {
         export: killReportExport,

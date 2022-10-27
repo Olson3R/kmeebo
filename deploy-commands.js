@@ -44,6 +44,10 @@ const commands = [
       .addStringOption(option => option.setName('tag').setDescription('The Eve Echoes tag for the coropration.').setRequired(true))
     ),
 
+
+  new SlashCommandBuilder().setName('discord').setDescription('Commands related to this discord guild.')
+    .addSubcommand(subcommand => subcommand.setName('get-guild-id').setDescription('Get the ID of this Discord Guild.')),
+
   new SlashCommandBuilder().setName('kill-report').setDescription('Commands related to kill reports.')
     .addSubcommand(subcommand => subcommand.setName('export').setDescription('Export all kill reports to a CSV file.'))
     .addSubcommand(subcommand => subcommand.setName('show').setDescription('Show information for a kill report by id.')
