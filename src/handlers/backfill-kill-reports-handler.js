@@ -15,9 +15,9 @@ const getImageAttachment = async (url) => {
 const getBackfillMessage = () => {
   return BackfillMessage.findOne({
     where: {
-      status: 'PENDING'
+      status: 'QUEUED'
     },
-    order: [['createdAt', 'ASC']],
+    order: [['updatedAt', 'ASC']],
     limit: 1
   })
 }
@@ -36,7 +36,6 @@ const processBackfillMessage = async (client, backfillMessage) => {
   const killReports = []
   for (const imageUrl of backfillMessage.imageUrls.split('\n')) {
     const imageData = await getImageAttachment(imageUrl)
-    console.log('IMGGG', imageUrl)
 
     try {
       const killReport = await parseKillReport(

@@ -4,6 +4,7 @@ const config = require('config')
 const adminAddAdmin = require('./src/commands/admin-add-admin')
 const adminAllowCorpForwarding = require('./src/commands/admin-allow-corp-forwarding')
 const adminBackfillKillReports = require('./src/commands/admin-backfill-kill-reports')
+const adminFindPastKillReports = require('./src/commands/admin-find-past-kill-reports')
 const { adminKillReportForwarding, adminKillReportForwardingSubmit } = require('./src/commands/admin-kill-report-forwarding')
 const adminListCorpForwards = require('./src/commands/admin-list-corp-forwards')
 const adminRemoveCorpForwarding = require('./src/commands/admin-remove-corp-forwarding')
@@ -53,6 +54,7 @@ client.on('interactionCreate', async interaction => {
         'add-admin': adminAddAdmin,
         'allow-corp-forwarding': adminAllowCorpForwarding,
         'backfill-kill-reports': adminBackfillKillReports,
+        'find-past-kill-reports': adminFindPastKillReports,
         'kill-report-forwarding': adminKillReportForwarding,
         'list-corp-forwards': adminListCorpForwards,
         'remove-admin': adminRemoveAdmin,
