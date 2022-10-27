@@ -12,9 +12,9 @@ const commands = [
       .addStringOption(option => option.setName('corp-guild-id').setDescription('The id of the corporation\'s guild to allow messages from.').setRequired(true))
       .addChannelOption(option => option.setName('forwardable-channel').setDescription('The channel to allow messages to be forwarded to.').setRequired(true))
     )
-
     // .addSubcommand(subcommand => subcommand.setName('backfill-kill-reports').setDescription('Read channel message history to find past kill reports.'))
-
+    // .addSubcommand(subcommand => subcommand.setName('find-past-kill-reports').setDescription('Read channel message history to find past kill reports. You will have to talk to a KMEEBO developer on Discord to get them processed due to additional costs.'))
+    .addSubcommand(subcommand => subcommand.setName('list-corp-forwards').setDescription('List all corporation guild permissions to post messages to channels.'))
     .addSubcommand(subcommand => subcommand.setName('remove-corp-forwarding').setDescription('Remove a corporation\'s guild permission to post messages to a channel.')
       .addStringOption(option => option.setName('corp-guild-id').setDescription('The id of the corporation\'s guild to allow messages from.').setRequired(true))
       .addChannelOption(option => option.setName('forwardable-channel').setDescription('The channel to allow messages to be forwarded to.').setRequired(false))

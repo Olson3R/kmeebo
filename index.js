@@ -4,8 +4,9 @@ const config = require('config')
 const adminAddAdmin = require('./src/commands/admin-add-admin')
 const adminAllowCorpForwarding = require('./src/commands/admin-allow-corp-forwarding')
 const adminBackfillKillReports = require('./src/commands/admin-backfill-kill-reports')
-const adminRemoveCorpForwarding = require('./src/commands/admin-remove-corp-forwarding')
 const { adminKillReportForwarding, adminKillReportForwardingSubmit } = require('./src/commands/admin-kill-report-forwarding')
+const adminListCorpForwards = require('./src/commands/admin-list-corp-forwards')
+const adminRemoveCorpForwarding = require('./src/commands/admin-remove-corp-forwarding')
 const adminRemoveAdmin = require('./src/commands/admin-remove-admin')
 const adminRemoveChannel = require('./src/commands/admin-remove-channel')
 const adminSetupChannel = require('./src/commands/admin-setup-channel')
@@ -53,6 +54,7 @@ client.on('interactionCreate', async interaction => {
         'allow-corp-forwarding': adminAllowCorpForwarding,
         'backfill-kill-reports': adminBackfillKillReports,
         'kill-report-forwarding': adminKillReportForwarding,
+        'list-corp-forwards': adminListCorpForwards,
         'remove-admin': adminRemoveAdmin,
         'remove-channel': adminRemoveChannel,
         'remove-corp-forwarding': adminRemoveCorpForwarding,
