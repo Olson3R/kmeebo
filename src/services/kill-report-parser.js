@@ -88,7 +88,7 @@ const RES = {
     participantCount: /Участники\s*\[\s*(?<value>[\d]+)\s*\]/i,
     finalBlow: /Решающий удар (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     topDamage: /Наибольший урон (?<damage>[\d]+) (?<percent>[\d]+)%/i,
-    warpScrambleStrength: /варп-двигателей: (?<value>-?\d+\.?\d?)/i,
+    warpScrambleStrength: /(варп-двигателей|Мощность варп-помех): (?<value>-?\d+\.?\d?)/i,
     totalDamage: /Общий урон: (?<value>[\d]+)/i,
     isk: /(?<value>[\d,]+) ISK/i,
     playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
@@ -139,7 +139,7 @@ const TEXT = {
   ru: {
     finalBlow: 'Решающий удар',
     topDamage: 'Наибольший урон',
-    warpScrambleStrength: ['Мощность глушения']
+    warpScrambleStrength: ['Мощность глушения', 'Мощность варп - помех']
   },
   zh: {
     finalBlow: '最 后 一 击',
@@ -178,7 +178,7 @@ const runRegExOnString = (text, re) => {
 
 const closePoints = (point1, point2) => {
   if (Math.abs(point1.x - point2.x) > 16) return false
-  return Math.abs(point1.y - point2.y) <= 3
+  return Math.abs(point1.y - point2.y) <= 6
 }
 
 const combineBoxes = (data) => {
@@ -309,7 +309,9 @@ const findVictim = (data, lang) => {
 
 const parseShipAndType = (line, ships, lang) => {
   console.log('1')
-  line = line.replace(/[^A-zÀ-ú ]/g, '').trim()
+  if (lang !== 'zh') {
+    line = line.replace(/[^A-zÀ-úа-яА-Я ]/g, '').trim()
+  }
   const shipTypes = _.chain(ships).map(ship => [ship.type, ship.enType]).uniq().value()
   console.log('2')
   const shipTypeMap = Object.fromEntries(
@@ -319,7 +321,7 @@ const parseShipAndType = (line, ships, lang) => {
   )
   console.log('3')
   const shipType = matchString(line, Object.keys(shipTypeMap), lang)
-  console.log('4')
+  console.log('4', line, shipType)
   if (!shipType) return [line, null]
 
   console.log('5')
@@ -433,7 +435,7 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
       killReport.statusMessage = 'Cannot determine language'
     } else {
       const combined = combineBoxes(data)
-      console.log('COMBINEEE', data.length, combined.length, combined)
+      console.log('COMBINEEE', data.length, combined.length, _.map(combined, c => ([c.description, JSON.stringify(c.boundingPoly.vertices)])))
       killReport.lang = lang
       killReport.type = type
 
