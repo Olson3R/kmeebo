@@ -21,6 +21,7 @@ const pilotLeaderboard = require('./src/commands/pilot-leaderboard')
 const pilotRegister = require('./src/commands/pilot-register')
 const pilotStats = require('./src/commands/pilot-stats')
 const userLeaderboard = require('./src/commands/user-leaderboard')
+const userStats = require('./src/commands/user-stats')
 
 const { killReportHandler } = require('./src/handlers/kill-report-handler')
 const { backfillKillReportsHandler } = require('./src/handlers/backfill-kill-reports-handler')
@@ -80,7 +81,8 @@ client.on('interactionCreate', async interaction => {
         stats: pilotStats
       },
       user: {
-        leaderboard: userLeaderboard
+        leaderboard: userLeaderboard,
+        stats: userStats
       }
     }
 

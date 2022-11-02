@@ -28,7 +28,7 @@ const RES = {
     isk: /(?<value>[\d,]+) ISK/i,
     playerAndCorp: /^\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
     corp: /^\s*\[\s*(?<corp>\w+)\s*\]\s*/,
-    time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
+    time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}\s*UTC\s*[+-]\s*\d+)/
   },
   en: {
     killReportId: /KILL REPORT [[(][I1][D0]:(?<value>[\d]+)[\])]/i,
@@ -114,7 +114,7 @@ const TEXT = {
   de: {
     finalBlow: 'Finaler Schlag',
     topDamage: 'Höchster Schaden',
-    warpScrambleStrength: ['Warp Störungsstärke']
+    warpScrambleStrength: ['Warp Störungsstärke', 'Warp - Störungsstärke']
   },
   en: {
     finalBlow: 'Final Blow',
