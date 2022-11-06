@@ -57,6 +57,7 @@ const killReportExport = async (interaction) => {
         return { attachment: Buffer.from(`${headers.join(',')}\n${reports.join('\n')}`, 'utf-8'), name: `kill-report-export-${index+1}.csv` }
       }
     )
+    await Promise.all(files)
 
     const embed = {
       color: colors.green,
