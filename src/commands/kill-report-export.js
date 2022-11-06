@@ -44,14 +44,16 @@ const killReportExport = async (interaction) => {
       'sourceImage.url'
     ]
     const reports = _.map(killReports, km => _.map(headers, h => _.get(km, h)).join(','))
-    const csv = Buffer.from(`${headers.join(',')}\n${reports.join('\n')}`, 'utf-8')
+    const files = _.chain(reports)
+      .chunk(50000)
+      .map((chunk, index) => ({ attachment: Buffer.from(`${headers.join(',')}\n${chunk.join('\n')}`, 'utf-8'), name: `kill-report-export-${index+1}.csv` }))
+      .value
 
     const embed = {
       color: colors.green,
       title: `Exported ${killReports.length} kill reports`
     }
-    await interaction.editReply({ embeds: [embed], files: [{ attachment: csv, name: 'kill-report-export.csv' }] })
-    // await interaction.reply({ embeds: [embed], attachments: [new AttachmentBuilder(csv, { name: 'kmeebo-export.csv'})] })
+    await interaction.editReply({ embeds: [embed], files })
   } else {
     const embed = {
       color: colors.red,
