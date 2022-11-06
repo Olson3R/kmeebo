@@ -58,6 +58,7 @@ const killReportExport = async (interaction) => {
       }
     )
     await Promise.all(files)
+    console.log(files)
 
     const embed = {
       color: colors.green,
