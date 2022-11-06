@@ -48,13 +48,13 @@ const killReportExport = async (interaction) => {
     const files = _.map(
       _.chunk(_.map(killReportIds, 'id'), 50000),
       async (chunk, index) => {
-        const killReportIds = await KillReport.findAll({
+        const killReports = await KillReport.findAll({
           where: { id: chunk},
           order: [['killedAt', 'ASC']],
           include: 'sourceImage',
         })
         const reports = _.map(killReports, km => _.map(headers, h => _.get(km, h)).join(','))
-        return _.map((chunk) => ({ attachment: Buffer.from(`${headers.join(',')}\n${chunk.join('\n')}`, 'utf-8'), name: `kill-report-export-${index+1}.csv` }))
+        return { attachment: Buffer.from(`${headers.join(',')}\n${reports.join('\n')}`, 'utf-8'), name: `kill-report-export-${index+1}.csv` }
       }
     )
 
