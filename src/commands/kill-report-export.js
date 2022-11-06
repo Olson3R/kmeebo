@@ -60,7 +60,7 @@ const killReportExport = async (interaction) => {
 
     const embed = {
       color: colors.green,
-      title: `Exported ${killReports.length} kill reports`
+      title: `Exported ${killReportIds.length} kill reports`
     }
     await interaction.editReply({ embeds: [embed], files })
   } else {
