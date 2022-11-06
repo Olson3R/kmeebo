@@ -19,7 +19,7 @@ const killReportExport = async (interaction) => {
     order: [['killedAt', 'ASC']]
   })
 
-  if (killReports.length > 0) {
+  if (killReportIds.length > 0) {
     const headers = [
       'id',
       'lang',
