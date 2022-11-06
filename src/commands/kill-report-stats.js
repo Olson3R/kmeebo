@@ -15,6 +15,9 @@ const formatNumber = (text) => {
 const killReportStats = async (interaction) => {
   const guildId = interaction.guildId
   const period = interaction.options.getString('period') ?? 'current-month'
+  const strStartDt = interaction.options.getString('start-date')
+  const strEndDt = interaction.options.getString('end-date')
+  const corporations = interaction.options.getString('corporations')
   const killTag = interaction.options.getString('kill-tag')
 
   let periodName = 'Lifetime'
@@ -22,7 +25,27 @@ const killReportStats = async (interaction) => {
   if (killTag) {
     where.killTag = killTag
   }
-  if (period === 'current-month') {
+  if (corporations) {
+    where.victimCorp = { [Op.in]: _.map(corporations.split(','), _.trim) }
+  }
+  if (strStartDt || strEndDt) {
+    const startDt = DateTime.fromISO(strStartDt)
+    const endDt = DateTime.fromISO(strEndDt)
+    if (startDt.isValid && endDt.isValid) {
+      where[Op.and] = [
+        { killedAt: { [Op.gt]: startDt.toJSDate() }},
+        { killedAt: { [Op.lt]: endDt.toJSDate() }},
+      ]
+    }
+    else if (startDt.isValid) {
+      where.killedAt = { [Op.gt]: startDt.toJSDate() }
+    }
+    else if (endDt.isValid) {
+      where.killedAt = { [Op.lt]: endDt.toJSDate() }
+    }
+    periodName = 'Custom'
+  }
+  else if (period === 'current-month') {
     where[Op.and] = [
       { killedAt: { [Op.gt]: DateTime.now().startOf('month').toJSDate() }},
       { killedAt: { [Op.lt]: DateTime.now().startOf('month').plus({ month: 1 }).toJSDate() }},

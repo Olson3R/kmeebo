@@ -58,6 +58,9 @@ const commands = [
         .addChoices({ name: 'Last Month', value: 'last-month' })
         .addChoices({ name: 'Lifetime', value: 'lifetime' })
       )
+      .addStringOption(option => option.setName('corporations').setDescription('A comma delimited list of corporation tags to find kill reports for.'))
+      .addStringOption(option => option.setName('start-date').setDescription('The ISO 8601 formatted date or date and time to start finding kill reports.'))
+      .addStringOption(option => option.setName('end-date').setDescription('The ISO 8601 formatted date or date and time to stop finding kill reports.'))
     ),
 
   new SlashCommandBuilder().setName('pilot').setDescription('Commands related to pilots.')
