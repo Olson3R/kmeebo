@@ -1,6 +1,7 @@
 config/local.json
 config/google-cloud-credentials.json
 kill-reports
+tmp
 
 # Logs
 logs

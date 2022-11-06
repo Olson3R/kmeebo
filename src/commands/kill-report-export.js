@@ -1,4 +1,5 @@
 const fsp = require('fs/promises')
+const { v4: uuidv4 } = require('uuid')
 const _ = require('lodash')
 
 const colors = require('../color-util')
@@ -52,16 +53,19 @@ const killReportExport = async (interaction) => {
         order: [['killedAt', 'ASC']],
         include: 'sourceImage',
       })
+      const file = `./tmp/${uuidv4()}.csv`
       const reports = _.map(killReports, km => _.map(headers, h => _.get(km, h)).join(','))
-      files.push({ attachment: Buffer.from(`${headers.join(',')}\n${reports.join('\n')}`, 'utf-8'), name: `kill-report-export-${files.length+1}.csv` })
+      await fsp.writeFile(file, `${headers.join(',')}\n${reports.join('\n')}`)
+      // files.push({ attachment: Buffer.from(`${headers.join(',')}\n${reports.join('\n')}`, 'utf-8'), name: `kill-report-export-${files.length+1}.csv` })
+      files.push(file)
     }
-    console.log(files[0])
 
     const embed = {
       color: colors.green,
       title: `Exported ${killReportIds.length} kill reports`
     }
-    await interaction.editReply({ embeds: [embed], files })
+    await interaction.editReply({ embeds: [embed], files: _.map(files, (file, index) => ({ attachment: file, name: `kill-report-export-${index+1}.csv` }))})
+    _.each(files, file => fsp.unlink(file))
   } else {
     const embed = {
       color: colors.red,
