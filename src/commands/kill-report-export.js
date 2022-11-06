@@ -62,9 +62,14 @@ const killReportExport = async (interaction) => {
 
     const embed = {
       color: colors.green,
-      title: `Exported ${killReportIds.length} kill reports`
+      title: `Exporting ${killReportIds.length} kill reports`
     }
-    await interaction.editReply({ embeds: [embed], files: _.map(files, (file, index) => ({ attachment: file, name: `kill-report-export-${index+1}.csv` }))})
+    await interaction.editReply({ embeds: [embed], files: [{ attachment: files[0], name: 'kill-report-export-1.csv' }]})
+    let i = 1
+    for (const file of _.drop(files, 1)) {
+      i++
+      await interaction.channel.send({ files: [{ attachment: file, name: `kill-report-export-${i}.csv` }] })
+    }
     _.each(files, file => fsp.unlink(file))
   } else {
     const embed = {
