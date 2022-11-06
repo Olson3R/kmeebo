@@ -13,7 +13,7 @@ const killReportExport = async (interaction) => {
   const where = { guildId, status: 'SUCCESS' }
   if (killTag) where.killTag = killTag
 
-  const killReportIdss = await KillReport.findAll({
+  const killReportIds = await KillReport.findAll({
     attributes: ['id'],
     where,
     order: [['killedAt', 'ASC']]
