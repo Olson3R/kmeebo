@@ -17,8 +17,11 @@ const killReportStats = async (interaction) => {
   const period = interaction.options.getString('period') ?? 'current-month'
   const strStartDt = interaction.options.getString('start-date')
   const strEndDt = interaction.options.getString('end-date')
-  const corporations = interaction.options.getString('corporations')
+  const corporations = interaction.options.getString('victim-corporations')
   const killTag = interaction.options.getString('kill-tag')
+
+  const startDt = DateTime.fromISO(strStartDt)
+  const endDt = DateTime.fromISO(strEndDt)
 
   let periodName = 'Lifetime'
   const where = { guildId, type: 'kill', status: 'SUCCESS' }
@@ -28,9 +31,7 @@ const killReportStats = async (interaction) => {
   if (corporations) {
     where.victimCorp = { [Op.in]: _.map(corporations.split(','), _.trim) }
   }
-  if (strStartDt || strEndDt) {
-    const startDt = DateTime.fromISO(strStartDt)
-    const endDt = DateTime.fromISO(strEndDt)
+  if (startDt.isValid || endDt.isValid) {
     if (startDt.isValid && endDt.isValid) {
       where[Op.and] = [
         { killedAt: { [Op.gt]: startDt.toJSDate() }},
@@ -38,7 +39,10 @@ const killReportStats = async (interaction) => {
       ]
     }
     else if (startDt.isValid) {
-      where.killedAt = { [Op.gt]: startDt.toJSDate() }
+      where[Op.and] = [
+        { killedAt: { [Op.gt]: startDt.toJSDate() }},
+        { killedAt: { [Op.lt]: DateTime.utc().toJSDate() }},
+      ]
     }
     else if (endDt.isValid) {
       where.killedAt = { [Op.lt]: endDt.toJSDate() }
@@ -77,8 +81,12 @@ const killReportStats = async (interaction) => {
   const embed = {
     type: 'rich',
     color: colors.green,
-    title: `${periodName} Kill Report Stats${killTag ? ` For Kill Tag ${killTag}` : ''}`,
-    description: `${grandTotals}\n\n${results.join('\n')}`
+    title: `Kill Report Stats${killTag ? ` For Kill Tag ${killTag}` : ''}`,
+    description: `**Period:** ${periodName}\n` +
+      (startDt.isValid ? `**Start Date:** ${startDt.toLocaleString(DateTime.DATETIME_SHORT)}\n` : '') +
+      (endDt.isValid ? `**End Date:** ${endDt.toLocaleString(DateTime.DATETIME_SHORT)}\n` : '') +
+      (corporations?.length ? `**Victim Corporations:** ${_.map(corporations.split(','), _.trim).join(', ')}\n` : '') +
+      `\n${grandTotals}\n\n${results.join('\n')}`
   }
 
   await interaction.reply({ embeds: [embed] })
