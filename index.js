@@ -1,7 +1,7 @@
 const { Client, GatewayIntentBits } = require('discord.js')
 const config = require('config')
 
-const adminAddAdmin = require('./src/commands/admin-add-admin')
+const adminAddUserRole = require('./src/commands/admin-add-user-role')
 const adminAllowCorpForwarding = require('./src/commands/admin-allow-corp-forwarding')
 const adminBackfillKillReports = require('./src/commands/admin-backfill-kill-reports')
 const adminFindPastKillReports = require('./src/commands/admin-find-past-kill-reports')
@@ -14,6 +14,7 @@ const adminSetupChannel = require('./src/commands/admin-setup-channel')
 const corporationLeaderboard = require('./src/commands/corporation-leaderboard')
 const corporationStats = require('./src/commands/corporation-stats')
 const getDiscordGuildId = require('./src/commands/discord-get-guild-id')
+const killReportEdit = require('./src/commands/kill-report-edit')
 const killReportExport = require('./src/commands/kill-report-export')
 const killReportShow = require('./src/commands/kill-report-show')
 const killReportStats = require('./src/commands/kill-report-stats')
@@ -52,7 +53,7 @@ client.on('interactionCreate', async interaction => {
 
     const commandMapping = {
       admin: {
-        'add-admin': adminAddAdmin,
+        'add-user-role': adminAddUserRole,
         'allow-corp-forwarding': adminAllowCorpForwarding,
         'backfill-kill-reports': adminBackfillKillReports,
         'find-past-kill-reports': adminFindPastKillReports,
@@ -71,6 +72,7 @@ client.on('interactionCreate', async interaction => {
         'get-guild-id': getDiscordGuildId
       },
       'kill-report': {
+        edit: killReportEdit,
         export: killReportExport,
         show: killReportShow,
         stats: killReportStats

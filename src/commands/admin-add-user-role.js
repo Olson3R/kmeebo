@@ -4,7 +4,7 @@ const colors = require('../color-util')
 const { isAdmin } = require('../util')
 const { User } = require('../models')
 
-const adminAddAdmin = async (interaction) => {
+const adminAddUserRole = async (interaction) => {
   const guildId = interaction.guildId
   const updatedBy = interaction.user.tag
   if (!(await isAdmin(guildId, interaction.member))) {
@@ -18,14 +18,15 @@ const adminAddAdmin = async (interaction) => {
   }
 
   const userToAdd = interaction.options.getUser('user')
+  const role = interaction.options.getString('role')
 
   try {
     const user = _.first(await User.findOrCreate({
       where: { guildId, discordTag: userToAdd.tag },
-      defaults: { updatedBy, type: 'admin' }
+      defaults: { updatedBy, type: role }
     }))
     user.updatedBy = updatedBy
-    user.type = 'admin'
+    user.type = role
     await user.save()
 
     const fields = [
@@ -36,7 +37,7 @@ const adminAddAdmin = async (interaction) => {
     const embed = {
       color: colors.green,
       title: 'Added Admin User',
-      description: 'This user can now use admin commands.',
+      description: `This user can now use ${user.type} commands.`,
       footer: { text: user.id },
       fields
     }
@@ -44,11 +45,11 @@ const adminAddAdmin = async (interaction) => {
   } catch (e) {
     const embed = {
       color: colors.red,
-      title: 'Error Adding Admin User',
+      title: 'Error Adding User Role',
       description: e.message
     }
     await interaction.reply({ embeds: [embed] })
   }
 }
 
-module.exports = adminAddAdmin
+module.exports = adminAddUserRole
