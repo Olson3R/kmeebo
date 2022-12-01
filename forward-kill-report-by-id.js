@@ -1,11 +1,7 @@
-const axios = require('axios')
-const fs = require('fs')
-const fsp = require('fs/promises')
-const path = require('path')
 const _ = require('lodash')
 
 const logger = require('./src/services/logger')
-const { KillReport } = require('./src/models')
+const { Channel, KillReport } = require('./src/models')
 
 const KILL_REPORT_ID = process.argv[2]
 if (!KILL_REPORT_ID) {
