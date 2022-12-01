@@ -16,7 +16,7 @@ const run = async () => {
     })
 
     const sourceImage = killReport.sourceImage
-    const channelForwards = await Channel.findMany({ where: { guildId: killReport.guildId }})
+    const channelForwards = await Channel.findAll({ where: { guildId: killReport.guildId }})
     await Promise.all(_.map(channelForwards, async (channelForward) => {
       if (!channelForward.forwardToChannelId) return
 
