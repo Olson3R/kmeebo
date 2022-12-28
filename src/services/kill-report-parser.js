@@ -4,6 +4,7 @@ const fs = require('fs')
 const fsp = require('fs/promises')
 const path = require('path')
 const { DateTime } = require('luxon')
+const sizeOf = require('image-size')
 // const Fuse = require('fuse.js')
 const Finder = require('homoglyph-finder')
 const { Op } = require('sequelize')
@@ -13,6 +14,9 @@ const GoogleAuth = require('../../config/google-cloud-credentials.json')
 const Systems = require('../../config/systems.json')
 const { KillReport, SourceImage } = require('../models')
 const logger = require('./logger')
+
+const ISK_X_PCT = 74.0
+const ISK_Y_PCT = 29.0
 
 const REGIONS = _.chain(Systems).map('region').uniq().value()
 const KM_DIR = './kill-reports'
@@ -25,7 +29,7 @@ const RES = {
     topDamage: /Höchster Schaden (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /Warp-Störungsstärke:\s*(?<value>-?\d+\.?\d?)/i,
     totalDamage: /Gesamtschaden: (?<value>[\d]+)/i,
-    isk: /(?<value>[\d,]+) ISK/i,
+    isk: /(?<value>\d{1,3}(,\d{3})+)/i,
     playerAndCorp: /^\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
     corp: /^\s*\[\s*(?<corp>\w+)\s*\]\s*/,
     time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}\s*UTC\s*[+-]\s*\d+)/
@@ -38,7 +42,7 @@ const RES = {
     topDamage: /Top Damage (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /Warp S[co]ramble Strength: (?<value>-?\d+\.?\d?)/i,
     totalDamage: /Total damage: (?<value>[\d]+)/i,
-    isk: /(?<value>[\d,]+) ISK/i,
+    isk: /(?<value>\d{1,3}(,\d{3})+)/i,
     playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
     corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
     time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
@@ -51,7 +55,7 @@ const RES = {
     topDamage: /Daño máximo (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /impulsos: (?<value>-?\d+\.?\d?)/i,
     totalDamage: /Daño total: (?<value>[\d]+)/i,
-    isk: /(?<value>[\d,]+) ISK/i,
+    isk: /(?<value>\d{1,3}(,\d{3})+)/i,
     playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
     corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
     time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
@@ -64,7 +68,7 @@ const RES = {
     topDamage: /Meilleurs dégâts\s*(?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /Puissance d'inhibition de warp: (?<value>-?\d+\.?\d?)/i,
     totalDamage: /Dégâts totaux\s*:\s*(?<value>[\d]+)/i,
-    isk: /(?<value>[\d,]+) ISK/i,
+    isk: /(?<value>\d{1,3}(,\d{3})+)/i,
     playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
     corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
     time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
@@ -77,7 +81,7 @@ const RES = {
     topDamage: /Maior dano (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /(Força d[ao] codificador de transpulsão|Warp S[co]ramble Strength)}:\s*(?<value>-?\d+\.?\d?)?/i,
     totalDamage: /Dano total: (?<value>[\d]+)/i,
-    isk: /(?<value>[\d,]+) ISK/i,
+    isk: /(?<value>\d{1,3}(,\d{3})+)/i,
     playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
     corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
     time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
@@ -90,7 +94,7 @@ const RES = {
     topDamage: /Наибольший урон (?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /(варп-двигателей|Мощность варп-помех): (?<value>-?\d+\.?\d?)/i,
     totalDamage: /Общий урон: (?<value>[\d]+)/i,
-    isk: /(?<value>[\d,]+) ISK/i,
+    isk: /(?<value>\d{1,3}(,\d{3})+)/i,
     playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
     corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
     time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
@@ -103,7 +107,7 @@ const RES = {
     topDamage: /造成伤害最多\s*(?<damage>[\d]+) (?<percent>[\d]+)%/i,
     warpScrambleStrength: /跃迁干扰强度\s*:\s*(?<value>-?\d+\.?\d?)/i,
     totalDamage: /总伤害量\s*:\s*(?<value>[\d]+)/i,
-    isk: /(?<value>\d+(\d,)+)/i,
+    isk: /(?<value>\d{1,3}(,\d{3})+)/i,
     playerAndCorp: /\[\s*(?<corp>\w+)\s*\]\s*(?<player>.+)/,
     corp: /\[\s*(?<corp>\w+)\s*\]\s*/,
     time: /(?<value>\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2} UTC\s*[+-]\d+)/
@@ -253,13 +257,21 @@ const closestVertIdx = (data, wx, wy, vertIdx, skipIndexes) => {
   return closeIdx
 }
 
+const findIsk = (data, iw, ih, lang) => {
+  const iskPossibilities = data.filter(d => RES[lang].isk.test(d.description))
+  const closeIdx = closestVertIdx(iskPossibilities, iw * ISK_X_PCT, ih * ISK_Y_PCT, 2, [])
+  // console.log('ISK', iskPossibilities, closeIdx)
+
+  return parseInt(iskPossibilities[closeIdx].description.replace(/,/g, ''))
+}
+
 const findFinalBlow = (data, lang, ships) => {
   const finalBlowIdx = _.findIndex(data, d => d.description.startsWith(TEXT[lang].finalBlow))
   if (finalBlowIdx < 0) return { corp: null, player: null }
   const skips = [finalBlowIdx]
 
-  const top = data[finalBlowIdx]
-  const { x: wx, y: wy } = top.boundingPoly.vertices[0]
+  const finalBlowBox = data[finalBlowIdx]
+  const { x: wx, y: wy } = finalBlowBox.boundingPoly.vertices[0]
   let closeIdx = closestVertIdx(data, wx, wy, 2, skips)
   const match = _.get(Finder.search(data[closeIdx].description, _.map(ships, 'name')), '0')
   if (match) {
@@ -470,6 +482,9 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
           return duplicateKillReport
         }
 
+        const size = await sizeOf(Buffer.from(imageData))
+        console.log('SSSIIIZZZEEE', size)
+
         console.log('SHIPS???')
         const ships = require(`../../config/ships.${lang}.json`)
         const shipTypes = _.chain(ships).map('type').uniq().value()
@@ -496,12 +511,14 @@ const parseKillReport = async (guildId, submittedBy, filename, imageData, opts =
         }
 
         console.log('ISK')
-        const iskIdx = regExIdx(lines, RES[lang].isk)
-        if (iskIdx >= 0) {
-          const v = runRegExOnString(lines[iskIdx], RES[lang].isk)
-          killReport.isk = parseInt(_.get(v, 'value').replace(/,/g, ''))
-          lines[iskIdx] = null
-        }
+        // const iskIdx = regExIdx(lines, RES[lang].isk)
+        // if (iskIdx >= 0) {
+        //   const v = runRegExOnString(lines[iskIdx], RES[lang].isk)
+        //   killReport.isk = parseInt(_.get(v, 'value').replace(/,/g, ''))
+        //   lines[iskIdx] = null
+        // }
+        killReport.isk = findIsk(combined, size.width, size.height, lang)
+        // console.log('ISKIESSS', killReport.isk)
 
         console.log('SHIP')
         const shipIdx = stringIncludesIdx(lines, lang === 'zh' ? shipTypes : shipTypes.concat(shipTypes.map(t => t.slice(0, -1))).concat(shipTypes.map(t => t.slice(0, -2))), lang)
